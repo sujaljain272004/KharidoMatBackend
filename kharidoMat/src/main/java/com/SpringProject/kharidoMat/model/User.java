@@ -1,7 +1,9 @@
 package com.SpringProject.kharidoMat.model;
 
-import jakarta.persistence.*;
+import java.util.HashSet;
+import java.util.Set;
 
+import jakarta.persistence.*;
 
 @Entity
 @Table(name = "users")
@@ -18,12 +20,11 @@ public class User {
 
     private String password;
 
-  
-    private String studentId; 
+    private String studentId;
 
-   
 
-   
+    // Getters and Setters
+
     public Long getId() {
         return id;
     }
@@ -63,6 +64,20 @@ public class User {
     public void setStudentId(String studentId) {
         this.studentId = studentId;
     }
+    
+    @ManyToMany
+    @JoinTable(name = "user_wishlist",
+        joinColumns = @JoinColumn(name = "user_id"),
+        inverseJoinColumns = @JoinColumn(name = "item_id"))
+    private Set<Item> wishlist = new HashSet<>();
 
-  
+    public Set<Item> getWishlist() {
+        return wishlist;
+    }
+
+    public void setWishlist(Set<Item> wishlist) {
+        this.wishlist = wishlist;
+    }
+
+    
 }

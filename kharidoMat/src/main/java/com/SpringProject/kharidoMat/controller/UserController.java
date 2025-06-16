@@ -1,6 +1,8 @@
 package com.SpringProject.kharidoMat.controller;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -63,9 +65,31 @@ public class UserController {
 		return ResponseEntity.ok(token);
 	}
 	
+
+	
 	@GetMapping("/test")
 	public ResponseEntity<String> testProtectedApi() {
 	    return ResponseEntity.ok("You are authenticated! 🎉");
 	}
+	
+	@PostMapping("/wishlist/add/{email}/{itemId}")
+	public ResponseEntity<String> addToWishlist(@PathVariable String email, @PathVariable Long itemId) {
+	    userService.addToWishlist(email, itemId);
+	    return ResponseEntity.ok("Item added to wishlist.");
+	}
+	
+	@PostMapping("/wishlist/remove/{email}/{itemId}")
+	public ResponseEntity<String> removeFromWishlist(@PathVariable String email, @PathVariable Long itemId) {
+	    userService.removeFromWishlist(email, itemId);
+	    return ResponseEntity.ok("Item removed from wishlist.");
+	}
+	
+	
+	@GetMapping("/wishlist/{email}")
+	public ResponseEntity<Set<?>> getWishlist(@PathVariable String email) {
+	    return ResponseEntity.ok(userService.getWishlist(email));
+	}
+
+
 
 }

@@ -18,6 +18,8 @@ public class ItemService {
 
     @Autowired
     private UserRepository userRepository;
+    
+    
 
     public Item createItem(Item item, String email) {
         User user = userRepository.findByEmail(email);
@@ -41,6 +43,8 @@ public class ItemService {
     public Item saveItem(Item item) {
         return itemRepository.save(item);
     }
-
-
+    
+    public List<Item> searchItems(String title, String category, Double minPrice, Double maxPrice, Boolean available) {
+        return itemRepository.searchItems(title, category, minPrice, maxPrice, available);
+    }
 }

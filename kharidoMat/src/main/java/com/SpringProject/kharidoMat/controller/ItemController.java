@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.SpringProject.kharidoMat.model.Item;
+import com.SpringProject.kharidoMat.repository.ItemRepository;
 import com.SpringProject.kharidoMat.service.ItemService;
 import com.SpringProject.kharidoMat.util.FileUploadUtil;
 import com.SpringProject.kharidoMat.util.JwtUtil;
@@ -84,5 +85,17 @@ public class ItemController {
                 .header("Content-Type", "image/jpeg")
                 .body(image);
     }
+    
+    @GetMapping("/search")
+    public List<Item> searchItems(
+            @RequestParam(required = false) String title,
+            @RequestParam(required = false) String category,
+            @RequestParam(required = false) Double minPrice,
+            @RequestParam(required = false) Double maxPrice,
+            @RequestParam(required = false) Boolean available
+    ) {
+        return itemService.searchItems(title, category, minPrice, maxPrice, available);
+    }
+
 
 }
