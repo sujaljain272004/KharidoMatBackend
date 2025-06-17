@@ -96,6 +96,5 @@ public class ItemController {
     ) {
         return itemService.searchItems(title, category, minPrice, maxPrice, available);
     }
-
-
+    
 }

@@ -72,6 +72,9 @@ public class UserController {
 	    return ResponseEntity.ok("You are authenticated! 🎉");
 	}
 	
+	
+	//WishList
+	
 	@PostMapping("/wishlist/add/{email}/{itemId}")
 	public ResponseEntity<String> addToWishlist(@PathVariable String email, @PathVariable Long itemId) {
 	    userService.addToWishlist(email, itemId);

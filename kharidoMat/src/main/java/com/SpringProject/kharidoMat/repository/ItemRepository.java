@@ -26,4 +26,5 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
 	                           @Param("minPrice") Double minPrice,
 	                           @Param("maxPrice") Double maxPrice,
 	                           @Param("available") Boolean available);
+	 
 }

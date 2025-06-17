@@ -3,6 +3,8 @@ package com.SpringProject.kharidoMat.model;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import jakarta.persistence.*;
 
 @Entity
@@ -69,6 +71,7 @@ public class User {
     @JoinTable(name = "user_wishlist",
         joinColumns = @JoinColumn(name = "user_id"),
         inverseJoinColumns = @JoinColumn(name = "item_id"))
+    @JsonIgnoreProperties("user")
     private Set<Item> wishlist = new HashSet<>();
 
     public Set<Item> getWishlist() {

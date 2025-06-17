@@ -26,7 +26,7 @@ public class SecurityConfig {
                 .requestMatchers( "/api/users/register",    // ✅ Register
                 	    "/api/users/login",       // ✅ Login
                 	    "/api/items/search", 
-                	    "/api/items/all", 
+                	    "/api/items/**", 
                 	    "/api/items/image/**", 
                 	    "/api/items/category/**",
                 	    "/api/users/wishlist/**").permitAll() 
