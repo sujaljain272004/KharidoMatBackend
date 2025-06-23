@@ -7,6 +7,7 @@ import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -15,9 +16,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.SpringProject.kharidoMat.model.Booking;
 import com.SpringProject.kharidoMat.model.LoginRequest;
 import com.SpringProject.kharidoMat.model.User;
 import com.SpringProject.kharidoMat.repository.UserRepository;
+import com.SpringProject.kharidoMat.service.BookingService;
 import com.SpringProject.kharidoMat.service.UserService;
 import com.SpringProject.kharidoMat.util.JwtUtil;
 
@@ -92,6 +95,7 @@ public class UserController {
 	public ResponseEntity<Set<?>> getWishlist(@PathVariable String email) {
 	    return ResponseEntity.ok(userService.getWishlist(email));
 	}
+	
 
 
 

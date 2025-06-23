@@ -1,9 +1,11 @@
 package com.SpringProject.kharidoMat.serviceImpl;
 
 import java.util.List;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.stereotype.Service;
 
 import com.SpringProject.kharidoMat.model.Booking;
@@ -48,4 +50,27 @@ public class BookingServiceImpl implements BookingService {
 
         return bookingRepository.save(bookingRequest);
     }
+
+	@Override
+	public List<Booking> getBookingByUser(String username) {
+		
+		User user = userRepository.findByEmail(username);
+		if(user == null) {
+			 throw new UsernameNotFoundException("User not found");
+		}
+		return bookingRepository.findByUser(user);
+	}
+
+	@Override
+	public List<Booking> getBookingsForOwner(String username) {
+		
+		User user = userRepository.findByEmail(username);
+		if(user == null) {
+			throw new UsernameNotFoundException("user not found");
+		}
+		
+		return bookingRepository.findBookingsByItemOwner(user);
+	}
+	
+	
 }

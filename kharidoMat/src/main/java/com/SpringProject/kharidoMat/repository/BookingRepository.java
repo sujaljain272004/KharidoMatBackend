@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import com.SpringProject.kharidoMat.model.Booking;
+import com.SpringProject.kharidoMat.model.User;
 
 public interface BookingRepository extends JpaRepository<Booking, Long> {
 	@Query("SELECT b FROM Booking b WHERE b.item.id = :itemId " +
@@ -16,4 +17,10 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 		                                      @Param("startDate") LocalDate startDate,
 		                                      @Param("endDate") LocalDate endDate);
 
+	
+	
+	List<Booking> findByUser(User user);
+	
+	@Query("SELECT b FROM Booking b WHERE b.item.user = :owner")
+	List<Booking> findBookingsByItemOwner(@Param("owner") User owner);
 }
