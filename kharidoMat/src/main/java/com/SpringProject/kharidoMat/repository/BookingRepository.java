@@ -23,4 +23,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 	
 	@Query("SELECT b FROM Booking b WHERE b.item.user = :owner")
 	List<Booking> findBookingsByItemOwner(@Param("owner") User owner);
+	
+	List<Booking> findByEndDate(LocalDate endDate);
+
 }
