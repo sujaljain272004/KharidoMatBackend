@@ -23,16 +23,19 @@ public class SecurityConfig {
         http
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers( "/api/users/register",    // ✅ Register
-                	    "/api/users/login",       // ✅ Login
-                	    "/api/items/search", 
-                	    "/api/items/**", 
-                	    "/api/items/image/**", 
-                	    "/api/items/category/**",
-                	    "/api/users/wishlist/**",
-                	    "/ws/**").permitAll() 
-                .anyRequest().authenticated() 
-            )
+.requestMatchers(
+    "/api/users/register",       // ✅ Register
+    "/api/users/login",          // ✅ Login
+    "/api/items/search", 
+    "/api/items/**", 
+    "/api/items/image/**", 
+    "/api/items/category/**",
+    "/api/users/wishlist/**",
+    "/api/test/**",              // ✅ Test endpoint
+    "/ws/**"                     // ✅ WebSocket endpoint
+).permitAll()
+.anyRequest().authenticated()
+
             .sessionManagement(session -> session
                     .sessionCreationPolicy(SessionCreationPolicy.STATELESS) 
                 )
