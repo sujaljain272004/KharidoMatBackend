@@ -29,7 +29,8 @@ public class SecurityConfig {
                 	    "/api/items/**", 
                 	    "/api/items/image/**", 
                 	    "/api/items/category/**",
-                	    "/api/users/wishlist/**").permitAll() 
+                	    "/api/users/wishlist/**",
+                	    "/ws/**").permitAll() 
                 .anyRequest().authenticated() 
             )
             .sessionManagement(session -> session

@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.SpringProject.kharidoMat.model.Item;
-import com.SpringProject.kharidoMat.repository.ItemRepository;
 import com.SpringProject.kharidoMat.service.ItemService;
 import com.SpringProject.kharidoMat.util.FileUploadUtil;
 import com.SpringProject.kharidoMat.util.JwtUtil;
