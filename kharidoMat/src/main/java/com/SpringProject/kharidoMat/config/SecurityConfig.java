@@ -31,7 +31,8 @@ public class SecurityConfig {
             	        "/api/items/image/**", 
             	        "/api/items/category/**",
             	        "/api/users/wishlist/**",
-            	        "/api/test/**"               // ✅ Allow test email endpoint
+            	        "/api/test/**", // ✅ Allow test email endpoint
+            	        "/ws/**"// 
             	    ).permitAll()
             	    .anyRequest().authenticated()
             	)
