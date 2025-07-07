@@ -24,7 +24,6 @@ import com.SpringProject.kharidoMat.service.BookingService;
 import com.SpringProject.kharidoMat.service.UserService;
 import com.SpringProject.kharidoMat.util.JwtUtil;
 
-
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
@@ -62,41 +61,33 @@ public class UserController {
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid Credentials");
 		}
 
-		
 		String token = jwtUtil.generateToken(user.getEmail());
 
 		return ResponseEntity.ok(token);
 	}
-	
 
-	
 	@GetMapping("/test")
 	public ResponseEntity<String> testProtectedApi() {
-	    return ResponseEntity.ok("You are authenticated! 🎉");
+		return ResponseEntity.ok("You are authenticated! 🎉");
 	}
-	
-	
-	//WishList
-	
+
+	// WishList
+
 	@PostMapping("/wishlist/add/{email}/{itemId}")
 	public ResponseEntity<String> addToWishlist(@PathVariable String email, @PathVariable Long itemId) {
-	    userService.addToWishlist(email, itemId);
-	    return ResponseEntity.ok("Item added to wishlist.");
+		userService.addToWishlist(email, itemId);
+		return ResponseEntity.ok("Item added to wishlist.");
 	}
-	
+
 	@PostMapping("/wishlist/remove/{email}/{itemId}")
 	public ResponseEntity<String> removeFromWishlist(@PathVariable String email, @PathVariable Long itemId) {
-	    userService.removeFromWishlist(email, itemId);
-	    return ResponseEntity.ok("Item removed from wishlist.");
+		userService.removeFromWishlist(email, itemId);
+		return ResponseEntity.ok("Item removed from wishlist.");
 	}
-	
-	
+
 	@GetMapping("/wishlist/{email}")
 	public ResponseEntity<Set<?>> getWishlist(@PathVariable String email) {
-	    return ResponseEntity.ok(userService.getWishlist(email));
+		return ResponseEntity.ok(userService.getWishlist(email));
 	}
-	
-
-
 
 }
