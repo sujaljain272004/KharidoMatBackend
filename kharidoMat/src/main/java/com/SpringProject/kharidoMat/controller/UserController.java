@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.SpringProject.kharidoMat.model.Booking;
+import com.SpringProject.kharidoMat.model.DashboardStats;
 import com.SpringProject.kharidoMat.model.LoginRequest;
 import com.SpringProject.kharidoMat.model.User;
 import com.SpringProject.kharidoMat.repository.UserRepository;
@@ -96,6 +97,13 @@ public class UserController {
 	    return ResponseEntity.ok(userService.getWishlist(email));
 	}
 	
+	@GetMapping("/dashboard")
+	public ResponseEntity<DashboardStats> getDashboardStats(Authentication auth) {
+	    User user = userRepository.findByEmail(auth.getName());
+	    DashboardStats stats = userService.getUserStats(user.getId(), user.getRole().name());
+	    return ResponseEntity.ok(stats);
+	}
+
 
 
 
