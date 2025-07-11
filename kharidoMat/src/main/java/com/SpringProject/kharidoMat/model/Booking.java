@@ -3,7 +3,12 @@ package com.SpringProject.kharidoMat.model;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+import com.SpringProject.kharidoMat.enums.BookingStatus;
+
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -74,9 +79,24 @@ public class Booking {
 		this.item = item;
 	}  
     
+
 	public Double getAmount() {
 	    return this.amount;
 	}
+
+	@Enumerated(EnumType.STRING)
+	@Column(nullable = false)
+	private BookingStatus status = BookingStatus.ACTIVE;
+
+	public BookingStatus getStatus() {
+		return status;
+	}
+
+	public void setStatus(BookingStatus status) {
+		this.status = status;
+	}
+
+    
 
 	public boolean isReturned() {
 		return returned;

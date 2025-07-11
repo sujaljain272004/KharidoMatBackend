@@ -27,4 +27,8 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
 	                           @Param("maxPrice") Double maxPrice,
 	                           @Param("available") Boolean available);
 	 
+	 @Query("SELECT COUNT(i) FROM Item i WHERE i.user.id = :ownerId")
+	 int countByOwnerId(@Param("ownerId") Long ownerId);
+
+	 
 }

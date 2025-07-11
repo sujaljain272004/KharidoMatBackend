@@ -1,6 +1,5 @@
 package com.SpringProject.kharidoMat.serviceImpl;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -10,8 +9,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.SpringProject.kharidoMat.enums.Role;
+import com.SpringProject.kharidoMat.model.DashboardStats;
 import com.SpringProject.kharidoMat.model.Item;
 import com.SpringProject.kharidoMat.model.User;
+import com.SpringProject.kharidoMat.repository.BookingRepository;
 import com.SpringProject.kharidoMat.repository.ItemRepository;
 import com.SpringProject.kharidoMat.repository.UserRepository;
 import com.SpringProject.kharidoMat.service.UserService;
@@ -27,6 +29,9 @@ public class UserServiceImpl implements UserService {
 
 	@Autowired
 	private ItemRepository itemRepository;
+	
+	@Autowired
+	private BookingRepository bookingRepository;
 
 	@Override
 	public List<User> getAllUsers() {
@@ -41,6 +46,9 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public User registerUser(User user) {
 		user.setPassword(passwordEncoder.encode(user.getPassword()));
+	    if (user.getRole() == null) {
+	        user.setRole(Role.STUDENT); // fallback if not provided
+	    }
 		return userRepository.save(user);
 	}
 
@@ -111,5 +119,23 @@ public class UserServiceImpl implements UserService {
 		}
 		return user.getWishlist();
 	}
+
+	@Override
+	public DashboardStats getUserStats(Long userId, String role) {
+	    DashboardStats dto = new DashboardStats();
+
+	    if (role.equalsIgnoreCase("STUDENT")) {
+	        dto.setTotalBookings(bookingRepository.countByUserId(userId));
+	        Double spent = bookingRepository.getTotalSpentByUser(userId);
+	        dto.setTotalAmount(spent == null ? 0 : spent);
+	    } else if (role.equalsIgnoreCase("OWNER")) {
+	        dto.setTotalListings(itemRepository.countByOwnerId(userId));
+	        Double earnings = bookingRepository.getTotalEarningsByOwner(userId);
+	        dto.setTotalAmount(earnings == null ? 0 : earnings);
+	    }
+
+	    return dto;
+	}
+
 
 }

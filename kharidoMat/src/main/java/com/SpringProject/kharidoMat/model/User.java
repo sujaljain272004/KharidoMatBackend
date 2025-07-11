@@ -3,6 +3,7 @@ package com.SpringProject.kharidoMat.model;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.SpringProject.kharidoMat.enums.Role;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import jakarta.persistence.*;
@@ -23,7 +24,9 @@ public class User {
     private String password;
 
     private String studentId;
-
+    
+    @Enumerated(EnumType.STRING)
+    private Role role;
 
     // Getters and Setters
 
@@ -65,6 +68,14 @@ public class User {
 
     public void setStudentId(String studentId) {
         this.studentId = studentId;
+    }
+    
+    public Role getRole() {
+        return role;
+    }
+
+    public void setRole(Role role) {
+        this.role = role;
     }
     
     @ManyToMany

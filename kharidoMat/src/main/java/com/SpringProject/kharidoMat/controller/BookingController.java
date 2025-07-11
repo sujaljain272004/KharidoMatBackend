@@ -1,7 +1,11 @@
 package com.SpringProject.kharidoMat.controller;
 
+
 import java.time.LocalDateTime;
+
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -9,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -56,7 +61,7 @@ public class BookingController {
 		List<Booking> bookings = bookingService.getBookingsForOwner(username);
 		return ResponseEntity.ok(bookings);
 	}
-	
+
 	 
 	 @GetMapping("/return/{bookingId}")
 	 public ResponseEntity<String> confirmReturn(@PathVariable Long bookingId) {
@@ -119,6 +124,29 @@ public class BookingController {
 
 	     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid or expired OTP.");
 	 }
+
+	@PutMapping("/cancel/{id}")
+	public ResponseEntity<?> cancelBooking(@PathVariable Long id, Authentication authentication) {
+		String username = authentication.getName();
+		Booking booking = bookingService.cancelBooking(id, username);
+		return ResponseEntity.ok(booking);
+	}
+
+	@PutMapping("/extend/{id}")
+	public ResponseEntity<?> extendBooking(@PathVariable Long id, @RequestParam String newEndDate,
+			Authentication authentication) {
+		String username = authentication.getName();
+		LocalDate date = LocalDate.parse(newEndDate);
+		Booking updated = bookingService.extendBooking(id, date, username);
+		return ResponseEntity.ok(updated);
+	}
+
+	@GetMapping("/status-grouped")
+	public ResponseEntity<?> getStatusGroupedBookings(Authentication authentication) {
+		String email = authentication.getName();
+		Map<String, List<Booking>> grouped = bookingService.getBookingsGroupedByStatus(email);
+		return ResponseEntity.ok(grouped);
+	}
 
 
 }
