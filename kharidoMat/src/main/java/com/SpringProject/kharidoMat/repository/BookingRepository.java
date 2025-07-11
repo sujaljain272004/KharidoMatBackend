@@ -22,8 +22,6 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     List<Booking> findByReturnStatus(String returnStatus);
 
-    Optional<Booking> findById(Long id);
-
     @Query("SELECT b FROM Booking b " +
            "WHERE b.item.id = :itemId " +
            "AND b.status = 'ACTIVE' " +

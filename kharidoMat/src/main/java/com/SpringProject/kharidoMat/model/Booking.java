@@ -5,14 +5,7 @@ import java.time.LocalDateTime;
 
 import com.SpringProject.kharidoMat.enums.BookingStatus;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.*;
 
 @Entity
 public class Booking {
@@ -23,117 +16,112 @@ public class Booking {
 
     private LocalDate startDate;
     private LocalDate endDate;
-    
+
     private Double amount;
-    
+
     private boolean returned = false;
     private String returnStatus;
-    
-    
+
     private String otpCode;
     private LocalDateTime otpExpiry;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private BookingStatus status = BookingStatus.ACTIVE;
+
     @ManyToOne
-    private User user;  
+    private User user;
 
     @ManyToOne
     private Item item;
 
-	public Long getId() {
-		return id;
-	}
+    // Getters and Setters
 
-	public void setId(Long id) {
-		this.id = id;
-	}
+    public Long getId() {
+        return id;
+    }
 
-	public LocalDate getStartDate() {
-		return startDate;
-	}
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-	public void setStartDate(LocalDate startDate) {
-		this.startDate = startDate;
-	}
+    public LocalDate getStartDate() {
+        return startDate;
+    }
 
-	public LocalDate getEndDate() {
-		return endDate;
-	}
+    public void setStartDate(LocalDate startDate) {
+        this.startDate = startDate;
+    }
 
-	public void setEndDate(LocalDate endDate) {
-		this.endDate = endDate;
-	}
+    public LocalDate getEndDate() {
+        return endDate;
+    }
 
-	public User getUser() {
-		return user;
-	}
+    public void setEndDate(LocalDate endDate) {
+        this.endDate = endDate;
+    }
 
-	public void setUser(User user) {
-		this.user = user;
-	}
+    public Double getAmount() {
+        return amount;
+    }
 
-	public Item getItem() {
-		return item;
-	}
+    public void setAmount(Double amount) {
+        this.amount = amount;
+    }
 
-	public void setItem(Item item) {
-		this.item = item;
-	}  
-    
+    public boolean isReturned() {
+        return returned;
+    }
 
-	public Double getAmount() {
-	    return this.amount;
-	}
+    public void setReturned(boolean returned) {
+        this.returned = returned;
+    }
 
-	@Enumerated(EnumType.STRING)
-	@Column(nullable = false)
-	private BookingStatus status = BookingStatus.ACTIVE;
+    public String getReturnStatus() {
+        return returnStatus;
+    }
 
-	public BookingStatus getStatus() {
-		return status;
-	}
+    public void setReturnStatus(String returnStatus) {
+        this.returnStatus = returnStatus;
+    }
 
-	public void setStatus(BookingStatus status) {
-		this.status = status;
-	}
+    public String getOtpCode() {
+        return otpCode;
+    }
 
-    
+    public void setOtpCode(String otpCode) {
+        this.otpCode = otpCode;
+    }
 
-	public boolean isReturned() {
-		return returned;
-	}
+    public LocalDateTime getOtpExpiry() {
+        return otpExpiry;
+    }
 
-	public void setReturned(boolean returned) {
-		this.returned = returned;
-	}
+    public void setOtpExpiry(LocalDateTime otpExpiry) {
+        this.otpExpiry = otpExpiry;
+    }
 
-	public void setAmount(Double amount) {
-		this.amount = amount;
-	}
+    public BookingStatus getStatus() {
+        return status;
+    }
 
-	public String getReturnStatus() {
-		return returnStatus;
-	}
+    public void setStatus(BookingStatus status) {
+        this.status = status;
+    }
 
-	public void setReturnStatus(String returnStatus) {
-		this.returnStatus = returnStatus;
-	}
+    public User getUser() {
+        return user;
+    }
 
-	public String getOtpCode() {
-		return otpCode;
-	}
+    public void setUser(User user) {
+        this.user = user;
+    }
 
-	public void setOtpCode(String otpCode) {
-		this.otpCode = otpCode;
-	}
+    public Item getItem() {
+        return item;
+    }
 
-	public LocalDateTime getOtpExpiry() {
-		return otpExpiry;
-	}
-
-	public void setOtpExpiry(LocalDateTime otpExpiry) {
-		this.otpExpiry = otpExpiry;
-	}
-	
-	
-    
+    public void setItem(Item item) {
+        this.item = item;
+    }
 }

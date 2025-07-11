@@ -55,8 +55,7 @@ public class BookingServiceImpl implements BookingService {
         }
 
         List<Booking> conflicts = bookingRepository.findConflictingBookings(
-            itemId, bookingRequest.getStartDate(), bookingRequest.getEndDate()
-        );
+                itemId, bookingRequest.getStartDate(), bookingRequest.getEndDate());
 
         if (!conflicts.isEmpty()) {
             throw new RuntimeException("Item already booked for the selected dates.");
@@ -147,8 +146,7 @@ public class BookingServiceImpl implements BookingService {
         }
 
         List<Booking> conflictingBookings = bookingRepository.findConflictingBookings(
-                booking.getItem().getId(), booking.getEndDate().plusDays(1), newEndDate
-        );
+                booking.getItem().getId(), booking.getEndDate().plusDays(1), newEndDate);
 
         if (!conflictingBookings.isEmpty()) {
             throw new RuntimeException("Item is already booked during this extension period");
