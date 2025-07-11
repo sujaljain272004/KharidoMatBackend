@@ -3,13 +3,8 @@ package com.SpringProject.kharidoMat.model;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import jakarta.persistence.*;
-import lombok.*;
 
 @Entity
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
 public class Item {
 
     @Id
@@ -127,7 +122,7 @@ public class Item {
 
 
 
-	// 🔗 Who posted this item
+	// Who posted this item
     @ManyToOne
     @JoinColumn(name = "user_id")
     @JsonIgnoreProperties("items")

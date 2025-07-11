@@ -2,6 +2,7 @@ package com.SpringProject.kharidoMat.repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -12,6 +13,15 @@ import com.SpringProject.kharidoMat.model.User;
 
 public interface BookingRepository extends JpaRepository<Booking, Long> {
 
+    List<Booking> findByUser(User user);
+
+    @Query("SELECT b FROM Booking b WHERE b.item.user = :owner")
+    List<Booking> findBookingsByItemOwner(@Param("owner") User owner);
+
+    List<Booking> findByEndDate(LocalDate endDate);
+
+    List<Booking> findByReturnStatus(String returnStatus);
+
     @Query("SELECT b FROM Booking b " +
            "WHERE b.item.id = :itemId " +
            "AND b.status = 'ACTIVE' " +
@@ -19,13 +29,6 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     List<Booking> findConflictingBookings(@Param("itemId") Long itemId,
                                           @Param("startDate") LocalDate startDate,
                                           @Param("endDate") LocalDate endDate);
-
-    List<Booking> findByUser(User user);
-
-    @Query("SELECT b FROM Booking b WHERE b.item.user = :owner")
-    List<Booking> findBookingsByItemOwner(@Param("owner") User owner);
-
-    List<Booking> findByEndDate(LocalDate endDate);
 
     @Query("SELECT b FROM Booking b WHERE b.user = :user AND b.status = 'ACTIVE' AND b.startDate > :today")
     List<Booking> findUpcomingBookings(@Param("user") User user, @Param("today") LocalDate today);
