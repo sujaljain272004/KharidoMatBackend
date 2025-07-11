@@ -1,6 +1,7 @@
 package com.SpringProject.kharidoMat.model;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -17,6 +18,15 @@ public class Booking {
 
     private LocalDate startDate;
     private LocalDate endDate;
+    
+    private Double amount;
+    
+    private boolean returned = false;
+    private String returnStatus;
+    
+    
+    private String otpCode;
+    private LocalDateTime otpExpiry;
 
     @ManyToOne
     private User user;  
@@ -64,7 +74,46 @@ public class Booking {
 		this.item = item;
 	}  
     
-    
+	public Double getAmount() {
+	    return this.amount;
+	}
 
+	public boolean isReturned() {
+		return returned;
+	}
+
+	public void setReturned(boolean returned) {
+		this.returned = returned;
+	}
+
+	public void setAmount(Double amount) {
+		this.amount = amount;
+	}
+
+	public String getReturnStatus() {
+		return returnStatus;
+	}
+
+	public void setReturnStatus(String returnStatus) {
+		this.returnStatus = returnStatus;
+	}
+
+	public String getOtpCode() {
+		return otpCode;
+	}
+
+	public void setOtpCode(String otpCode) {
+		this.otpCode = otpCode;
+	}
+
+	public LocalDateTime getOtpExpiry() {
+		return otpExpiry;
+	}
+
+	public void setOtpExpiry(LocalDateTime otpExpiry) {
+		this.otpExpiry = otpExpiry;
+	}
+	
+	
     
 }

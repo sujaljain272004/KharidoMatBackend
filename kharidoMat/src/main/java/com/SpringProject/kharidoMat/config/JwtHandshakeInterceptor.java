@@ -32,7 +32,7 @@ public class JwtHandshakeInterceptor implements HandshakeInterceptor {
 
         if (request instanceof ServletServerHttpRequest serverRequest) {
             HttpServletRequest servletRequest = serverRequest.getServletRequest();
-            String token = servletRequest.getParameter("token"); // expects ?token=...
+            String token = servletRequest.getParameter("token"); 
             if (token != null && jwtUtil.isTokenValid(token)) {
                 String email = jwtUtil.extractEmail(token);
                 attributes.put("user", email);
@@ -45,6 +45,6 @@ public class JwtHandshakeInterceptor implements HandshakeInterceptor {
     @Override
     public void afterHandshake(ServerHttpRequest request, ServerHttpResponse response,
                                WebSocketHandler wsHandler, Exception exception) {
-        // nothing
+        //nothing
     }
 }

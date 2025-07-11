@@ -24,15 +24,16 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
             	    .requestMatchers(
-            	        "/api/users/register",       // ✅ Register
-            	        "/api/users/login",          // ✅ Login
+            	        "/api/users/register",       //  Register
+            	        "/api/users/login",          //  Login
             	        "/api/items/search", 
             	        "/api/items/**", 
             	        "/api/items/image/**", 
             	        "/api/items/category/**",
             	        "/api/users/wishlist/**",
-            	        "/api/test/**", // ✅ Allow test email endpoint
-            	        "/ws/**"// 
+            	        "/api/test/**", // Allow test email endpoint
+            	        "/ws/**",
+            	        "/api/return/**"//websocket endpoint
             	    ).permitAll()
             	    .anyRequest().authenticated()
             	)

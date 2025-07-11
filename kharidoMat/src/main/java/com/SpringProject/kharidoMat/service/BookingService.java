@@ -8,4 +8,6 @@ public interface BookingService {
     Booking createBooking(Long itemId, String username, Booking bookingRequest);
     List<Booking> getBookingByUser(String username);
     List<Booking> getBookingsForOwner(String username);
+    Booking getBookingById(Long bookingId);
+
 }
