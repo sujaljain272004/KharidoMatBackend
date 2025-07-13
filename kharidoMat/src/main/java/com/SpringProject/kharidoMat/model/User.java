@@ -25,6 +25,8 @@ public class User {
 
     private String studentId;
     
+    private boolean verified = false;          // has user confirmed email?
+    
     @Enumerated(EnumType.STRING)
     private Role role;
 
@@ -78,7 +80,17 @@ public class User {
         this.role = role;
     }
     
-    @ManyToMany
+    public boolean isVerified() {
+		return verified;
+	}
+
+	public void setVerified(boolean verified) {
+		this.verified = verified;
+	}
+
+
+
+	@ManyToMany
     @JoinTable(name = "user_wishlist",
         joinColumns = @JoinColumn(name = "user_id"),
         inverseJoinColumns = @JoinColumn(name = "item_id"))
