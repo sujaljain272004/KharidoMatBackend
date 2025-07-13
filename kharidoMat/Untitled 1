@@ -1,0 +1,200 @@
+# CampusRent (KharidoMat) — Peer-to-Peer College Rental Booking Platform
+
+CampusRent is a full-stack rental platform that enables college students to rent or lend items such as books, electronics, project kits, musical instruments, etc., within their campus community.
+
+---
+
+## Overview
+
+CampusRent helps students:
+
+- Earn passive income from unused items.
+- Save money by renting instead of buying.
+- Build a trustworthy community with verified college peers.
+
+---
+
+## 🛠️ Tech Stack
+
+| Layer    | Technology Used                          |
+| -------- | ---------------------------------------- |
+| Frontend | React.js (REST calls to backend)         |
+| Backend  | Spring Boot (Java), Spring Security, JWT |
+| Database | MySQL                                    |
+| Storage  | Local file storage (image uploads)       |
+| Auth     | JWT, Spring Security                     |
+| Payments | Razorpay |
+
+---
+
+## 📋 Project Structure (Backend)
+
+```
+com.SpringProject.kharidoMat
+|├── controller
+|├── service
+|├── serviceImpl
+|├── model
+|├── repository
+|├── config
+|└── util
+```
+
+---
+
+## ✨ Features Implemented
+
+| #  | Feature                        | Description                                                   |
+| -- | ------------------------------ | ------------------------------------------------------------- |
+| 1  | User Registration & Login      | With JWT token-based auth                                     |
+| 2  | Item Listing                   | With image, title, description, category, price, availability |
+| 3  | Booking                        | Rent items for a range of days                                |
+| 4  | Cancel Booking                 | Allowed only before booking start date                        |
+| 5  | Extend Booking                 | Extend only if ongoing & no conflicts                         |
+| 6  | Booking Status Classification  | Upcoming, Ongoing, Past                                       |
+| 7  | Image Upload                   | Store and fetch item images                                   |
+| 8  | Razorpay Integration (Planned) | For rental + security payments                                |
+| 9  | Review & Rating (Upcoming)     | Feedback from renters/lenders                                 |
+| 10 | Admin Panel (Upcoming)         | Manage users, reports, spam                                   |
+
+---
+
+## API Endpoints
+
+### Auth
+
+| Method | Endpoint            | Description              |
+| ------ | ------------------- | ------------------------ |
+| POST   | /api/users/register | Register user            |
+| POST   | /api/users/login    | Login, returns JWT token |
+
+###  Items
+
+| Method | Endpoint                         | Description                                          |
+| ------ | -------------------------------- | ---------------------------------------------------- |
+| POST   | /api/items/post                  | Add new item (requires JWT in Authorization header)  |
+| POST   | /api/items/upload-image/{itemId} | Upload image for item                                |
+| GET    | /api/items/all                   | Get all listed items                                 |
+| GET    | /api/items/category/{category}   | Filter items by category                             |
+| GET    | /api/items/image/{fileName}      | Fetch uploaded image                                 |
+| GET    | /api/items/search                | Search items by title, category, price, availability |
+
+###  Bookings
+
+| Method | Endpoint                                        | Description                               |
+| ------ | ----------------------------------------------- | ----------------------------------------- |
+| POST   | /api/bookings/item/{itemId}                     | Create booking for an item (requires JWT) |
+| GET    | /api/bookings/my                                | View bookings by logged-in user           |
+| GET    | /api/bookings/owner                             | View bookings for items owned by user     |
+| PUT    | /api/bookings/cancel/{id}                       | Cancel booking before start date          |
+| PUT    | /api/bookings/extend/{id}?newEndDate=YYYY-MM-DD | Extend booking if ongoing and available   |
+| GET    | /api/bookings/status-grouped                    | Group bookings by Upcoming, Ongoing, Past |
+
+###  Wishlist
+
+| Method | Endpoint                                    | Description                   |
+| ------ | ------------------------------------------- | ----------------------------- |
+| POST   | /api/users/wishlist/add/{email}/{itemId}    | Add item to wishlist by email |
+| POST   | /api/users/wishlist/remove/{email}/{itemId} | Remove item from wishlist     |
+| GET    | /api/users/wishlist/{email}                 | Get wishlist for user         |
+
+###  Reviews
+
+| Method | Endpoint              | Description                              |
+| ------ | --------------------- | ---------------------------------------- |
+| POST   | /api/reviews/{itemId} | Submit review for an item (JWT Required) |
+| GET    | /api/reviews/{itemId} | Get all reviews for item                 |
+
+---
+
+##  How to Use (Development)
+
+### 1. Clone the Project
+
+```bash
+git clone https://github.com/yourusername/KharidoMat.git
+```
+
+### 2. Backend Setup
+
+```bash
+cd KharidoMatBackend
+mvn clean install
+# Set DB credentials in application.properties
+# Create MySQL schema: KharidoMat
+
+# Run
+mvn spring-boot:run
+```
+
+### 3. Frontend Setup
+
+```bash
+cd KharidoMatFrontend
+npm install
+npm start
+```
+
+### 4. Test With Postman
+
+- Login and copy JWT token
+- Use Authorization: Bearer {token} in headers
+
+---
+
+## 🔍 Sample JSON Payloads
+
+✅ Register:
+
+```json
+{
+  "name": "Sujal",
+  "email": "sujal@example.com",
+  "password": "123456"
+}
+```
+
+✅ Login:
+
+```json
+{
+  "email": "sujal@example.com",
+  "password": "123456"
+}
+```
+
+✅ Booking:
+
+```json
+{
+  "startDate": "2025-07-10",
+  "endDate": "2025-07-12"
+}
+```
+
+---
+
+## 🚀 Upcoming Features
+
+- Razorpay payment completion
+- Wallet system for renters and lenders
+- Review system
+- Return verification via QR
+- Analytics (top rented items, active users, etc)
+
+---
+
+## 🎉 Contributors
+
+- Sujal Samadiya
+- Rucha Chavan 
+- Neha Narkhede
+- Krishna Tolani
+
+---
+
+## 🔧 License
+
+This project is for educational/demo purposes.
+
+
