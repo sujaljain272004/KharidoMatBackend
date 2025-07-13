@@ -11,44 +11,46 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 @Configuration
 public class SecurityConfig {
-	
-	private final JwtAuthFilter jwtAuthFilter;
+
+    private final JwtAuthFilter jwtAuthFilter;
 
     public SecurityConfig(JwtAuthFilter jwtAuthFilter) {
         this.jwtAuthFilter = jwtAuthFilter;
     }
-	
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
-            	    .requestMatchers(
-            	        "/api/users/register",       //  Register
-            	        "/api/users/login",          //  Login
-            	        "/api/items/search", 
-            	        "/api/items/**", 
-            	        "/api/items/image/**", 
-            	        "/api/items/category/**",
-            	        "/api/users/wishlist/**",
-            	        "/api/test/**", // Allow test email endpoint
-            	        "/ws/**",
-            	        "/api/return/**",//websocket endpoint
-            	        "/swagger-ui/**",
-                        "/v3/api-docs/**"
-            	    ).permitAll()
-            	    .anyRequest().authenticated()
-            	)
-
+                .requestMatchers(
+                    "/api/users/register",       
+                    "/api/users/login",          
+                    "/api/users/verify",
+                    "/api/users/forgot-password",
+                    "/api/users/reset-password",
+                    "/api/items/search", 
+                    "/api/items/**", 
+                    "/api/items/image/**", 
+                    "/api/items/category/**",
+                    "/api/users/wishlist/**",
+                    "/api/test/**", 
+                    "/ws/**",
+                    "/api/return/**",
+                    "/swagger-ui/**",
+                    "/v3/api-docs/**"
+                ).permitAll()
+                .anyRequest().authenticated()
+            )
             .sessionManagement(session -> session
-                    .sessionCreationPolicy(SessionCreationPolicy.STATELESS) 
-                )
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+            )
             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
-	
-	@Bean
+
+    @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }

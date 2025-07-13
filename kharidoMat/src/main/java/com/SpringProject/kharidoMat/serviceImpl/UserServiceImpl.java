@@ -16,6 +16,7 @@ import com.SpringProject.kharidoMat.model.User;
 import com.SpringProject.kharidoMat.repository.BookingRepository;
 import com.SpringProject.kharidoMat.repository.ItemRepository;
 import com.SpringProject.kharidoMat.repository.UserRepository;
+import com.SpringProject.kharidoMat.service.OTPService;
 import com.SpringProject.kharidoMat.service.UserService;
 
 @Service
@@ -29,9 +30,12 @@ public class UserServiceImpl implements UserService {
 
 	@Autowired
 	private ItemRepository itemRepository;
-	
+
 	@Autowired
 	private BookingRepository bookingRepository;
+
+	@Autowired
+	private OTPService otpService;
 
 	@Override
 	public List<User> getAllUsers() {
@@ -46,10 +50,17 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public User registerUser(User user) {
 		user.setPassword(passwordEncoder.encode(user.getPassword()));
-	    if (user.getRole() == null) {
-	        user.setRole(Role.STUDENT); // fallback if not provided
-	    }
-		return userRepository.save(user);
+		if (user.getRole() == null) {
+			user.setRole(Role.STUDENT); // fallback if not provided
+		}
+		user.setVerified(false); // mark user as unverified initially
+
+		User savedUser = userRepository.save(user);
+
+		// Send OTP to email
+		otpService.generateAndSendOTP(savedUser.getEmail());
+
+		return savedUser;
 	}
 
 	@Override
@@ -122,20 +133,29 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public DashboardStats getUserStats(Long userId, String role) {
-	    DashboardStats dto = new DashboardStats();
+		DashboardStats dto = new DashboardStats();
 
-	    if (role.equalsIgnoreCase("STUDENT")) {
-	        dto.setTotalBookings(bookingRepository.countByUserId(userId));
-	        Double spent = bookingRepository.getTotalSpentByUser(userId);
-	        dto.setTotalAmount(spent == null ? 0 : spent);
-	    } else if (role.equalsIgnoreCase("OWNER")) {
-	        dto.setTotalListings(itemRepository.countByOwnerId(userId));
-	        Double earnings = bookingRepository.getTotalEarningsByOwner(userId);
-	        dto.setTotalAmount(earnings == null ? 0 : earnings);
-	    }
+		if (role.equalsIgnoreCase("STUDENT")) {
+			dto.setTotalBookings(bookingRepository.countByUserId(userId));
+			Double spent = bookingRepository.getTotalSpentByUser(userId);
+			dto.setTotalAmount(spent == null ? 0 : spent);
+		} else if (role.equalsIgnoreCase("OWNER")) {
+			dto.setTotalListings(itemRepository.countByOwnerId(userId));
+			Double earnings = bookingRepository.getTotalEarningsByOwner(userId);
+			dto.setTotalAmount(earnings == null ? 0 : earnings);
+		}
 
-	    return dto;
+		return dto;
 	}
 
+	@Override
+	public boolean verifyEmail(String email, String otp) {
+		if (!otpService.verifyOTP(otp, email))
+			return false;
+		User user = userRepository.findByEmail(email);
+		user.setVerified(true);
+		userRepository.save(user);
+		return true;
+	}
 
 }
