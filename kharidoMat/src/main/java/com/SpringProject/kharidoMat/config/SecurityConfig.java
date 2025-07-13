@@ -33,7 +33,9 @@ public class SecurityConfig {
             	        "/api/users/wishlist/**",
             	        "/api/test/**", // Allow test email endpoint
             	        "/ws/**",
-            	        "/api/return/**"//websocket endpoint
+            	        "/api/return/**",//websocket endpoint
+            	        "/swagger-ui/**",
+                        "/v3/api-docs/**"
             	    ).permitAll()
             	    .anyRequest().authenticated()
             	)
