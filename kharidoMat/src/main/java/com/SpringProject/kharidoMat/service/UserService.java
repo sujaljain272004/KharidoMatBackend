@@ -25,4 +25,8 @@ public interface UserService {
 	DashboardStats getUserStats(Long userId, String role);
 
 	boolean verifyEmail(String email, String otp);
+	
+	 User saveBasicUserInfo(User user);
+	 
+	 void completeRegistration(String email, String password, String studentId);
 }

@@ -2,6 +2,8 @@ package com.SpringProject.kharidoMat.config;
 
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.http.server.ServletServerHttpRequest;
@@ -13,12 +15,10 @@ import com.SpringProject.kharidoMat.util.JwtUtil;
 
 import jakarta.servlet.http.HttpServletRequest;
 
-/* WebSocket doesn't send HTTP headers like normal APIs,
-    so we pass the token via query param and manually 
-    validate it during the handshake.
-*/
 @Component
 public class JwtHandshakeInterceptor implements HandshakeInterceptor {
+
+    private static final Logger logger = LoggerFactory.getLogger(JwtHandshakeInterceptor.class);
 
     private final JwtUtil jwtUtil;
 
@@ -33,18 +33,26 @@ public class JwtHandshakeInterceptor implements HandshakeInterceptor {
         if (request instanceof ServletServerHttpRequest serverRequest) {
             HttpServletRequest servletRequest = serverRequest.getServletRequest();
             String token = servletRequest.getParameter("token"); 
+
+            logger.info("WebSocket handshake attempt with token: {}", token);
+
             if (token != null && jwtUtil.isTokenValid(token)) {
                 String email = jwtUtil.extractEmail(token);
                 attributes.put("user", email);
+
+                logger.info("Token is valid. Email '{}' added to session attributes.", email);
                 return true;
+            } else {
+                logger.warn("Invalid or missing token during WebSocket handshake.");
             }
         }
+
         return false;
     }
 
     @Override
     public void afterHandshake(ServerHttpRequest request, ServerHttpResponse response,
                                WebSocketHandler wsHandler, Exception exception) {
-        //nothing
+        logger.info("WebSocket afterHandshake called.");
     }
 }
