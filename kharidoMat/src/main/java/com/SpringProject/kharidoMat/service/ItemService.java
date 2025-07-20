@@ -61,4 +61,11 @@ public class ItemService {
                 title, category, minPrice, maxPrice, available);
         return itemRepository.searchItems(title, category, minPrice, maxPrice, available);
     }
+    
+    public List<Item> getItemsByUserEmail(String email) {
+        logger.info("Getting items for user email: {}", email);
+        User user = userRepository.findByEmail(email);
+        return itemRepository.findByUser(user);
+    }
+
 }

@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import com.SpringProject.kharidoMat.model.Item;
+import com.SpringProject.kharidoMat.model.User;
 
 public interface ItemRepository extends JpaRepository<Item, Long> {
 
@@ -29,6 +30,9 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
 	 
 	 @Query("SELECT COUNT(i) FROM Item i WHERE i.user.id = :ownerId")
 	 int countByOwnerId(@Param("ownerId") Long ownerId);
+	 
+	 List<Item> findByUser(User user);
+
 
 	 
 }
