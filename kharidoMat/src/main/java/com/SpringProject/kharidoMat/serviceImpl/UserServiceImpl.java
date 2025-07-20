@@ -53,37 +53,38 @@ public class UserServiceImpl implements UserService {
 		return userRepository.findById(id).orElse(null);
 	}
 
-	public User saveBasicUserInfo(User user) {
-		logger.info("Saving basic user info: {}", user.getEmail());
+	@Override
+	public void saveBasicUserInfo(User user) {
+	    logger.info("Starting registration for: {}", user.getEmail());
 
-		if (userRepository.findByEmail(user.getEmail()) != null) {
-			throw new IllegalArgumentException("User already exists with email: " + user.getEmail());
-		}
+	    if (userRepository.findByEmail(user.getEmail()) != null) {
+	        throw new IllegalArgumentException("User already exists with email: " + user.getEmail());
+	    }
 
-		user.setVerified(false);
-		user.setRole(user.getRole() != null ? user.getRole() : Role.STUDENT);
+	    // Save basic user info first
+	    user.setVerified(false); // explicitly set
+	    userRepository.save(user); // 💾 this was missing
 
-		User savedUser = userRepository.save(user);
-		logger.info("Basic user info saved: {}", savedUser.getEmail());
+	    // Then generate and send OTP
+	    otpService.generateAndSendOTP(user.getEmail());
 
-		otpService.generateAndSendOTP(savedUser.getEmail());
-		logger.info("OTP sent to email: {}", savedUser.getEmail());
-
-		return savedUser;
+	    logger.info("User saved and OTP sent to email: {}", user.getEmail());
 	}
+
+
 	
 	public void completeRegistration(String email, String password, String studentId) {
 		User user = userRepository.findByEmail(email);
 		if (user == null) {
-		    throw new RuntimeException("User not found with email: " + email);
+			throw new IllegalArgumentException("User not found for email: " + email);
 		}
 
-	    user.setPassword(passwordEncoder.encode(password));
-	    user.setStudentId(studentId);
-	    user.setVerified(true);
+		user.setPassword(passwordEncoder.encode(password));
+		user.setStudentId(studentId);
+		user.setVerified(true);
+		user.setRole(Role.STUDENT);
 
-	    userRepository.save(user);
-	    logger.info("User registration completed: {}", email);
+		userRepository.save(user); // ✅ Update existing user instead of creating new
 	}
 
 
@@ -198,15 +199,23 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public boolean verifyEmail(String email, String otp) {
-		logger.info("Verifying OTP for email: {}", email);
-		if (!otpService.verifyOTP(email, otp)) {
-			logger.warn("OTP verification failed for email: {}", email);
-			return false;
-		}
-		User user = userRepository.findByEmail(email);
-		user.setVerified(true);
-		userRepository.save(user);
-		logger.info("Email verified successfully for user: {}", email);
-		return true;
+	    logger.info("Verifying OTP for email: {}", email);
+
+	    if (!otpService.verifyOTP(email, otp)) {
+	        logger.warn("OTP verification failed for email: {}", email);
+	        return false;
+	    }
+
+	    User user = userRepository.findByEmail(email);
+	    if (user == null) {
+	        logger.error("No user found with email: {}", email);
+	        return false; // or throw an exception if that's your design
+	    }
+
+	    user.setVerified(true);
+	    userRepository.save(user);
+	    logger.info("Email verified successfully for user: {}", email);
+	    return true;
 	}
+
 }

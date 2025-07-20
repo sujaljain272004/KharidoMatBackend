@@ -26,7 +26,7 @@ public interface UserService {
 
 	boolean verifyEmail(String email, String otp);
 	
-	 User saveBasicUserInfo(User user);
+	 void saveBasicUserInfo(User user);
 	 
 	 void completeRegistration(String email, String password, String studentId);
 }
