@@ -10,7 +10,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-
+import static org.springframework.security.config.Customizer.withDefaults;
 @Configuration
 public class SecurityConfig {
 
@@ -28,7 +28,8 @@ public class SecurityConfig {
         logger.info("Configuring SecurityFilterChain...");
 
         http
-            .csrf(csrf -> {
+        .cors(withDefaults())
+         .csrf(csrf -> {
                 csrf.disable();
                 logger.debug("CSRF disabled");
             })
@@ -72,4 +73,6 @@ public class SecurityConfig {
         logger.debug("BCryptPasswordEncoder bean created");
         return new BCryptPasswordEncoder();
     }
+    
+    
 }

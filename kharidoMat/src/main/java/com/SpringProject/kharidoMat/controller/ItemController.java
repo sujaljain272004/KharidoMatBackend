@@ -102,5 +102,28 @@ public class ItemController {
                 title, category, minPrice, maxPrice, available);
         return itemService.searchItems(title, category, minPrice, maxPrice, available);
     }
+    
+    @GetMapping("/my")
+    public ResponseEntity<?> getMyItems(@RequestHeader("Authorization") String authHeader) {
+        String token = authHeader.substring(7);
+        String email = jwtUtil.extractEmail(token);
+
+        logger.info("Fetching items posted by user '{}'", email);
+        List<Item> items = itemService.getItemsByUserEmail(email);
+        return ResponseEntity.ok(items);
+    }
+    
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getItemById(@PathVariable Long id) {
+        logger.info("Fetching item with ID {}", id);
+        try {
+            Item item = itemService.getItemById(id);
+            return ResponseEntity.ok(item);
+        } catch (Exception e) {
+            logger.error("Failed to fetch item with ID {}: {}", id, e.getMessage());
+            return ResponseEntity.status(404).body("Item not found");
+        }
+    }
+
 
 }
