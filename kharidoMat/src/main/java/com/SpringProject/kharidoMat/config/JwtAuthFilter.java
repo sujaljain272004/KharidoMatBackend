@@ -19,7 +19,6 @@ import com.SpringProject.kharidoMat.util.JwtUtil;
 
 import java.io.IOException;
 import java.util.Collections;
-
 @Component
 public class JwtAuthFilter extends OncePerRequestFilter {
 
@@ -28,21 +27,34 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     @Autowired
     private JwtUtil jwtUtil;
 
+    // ✅ Skip filtering for public paths    @Override
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String path = request.getRequestURI();
+
+        return path.equals("/api/users/register")
+                || path.equals("/api/users/login")
+                || path.equals("/api/users/verify")
+                || path.equals("/api/users/forgot-password")
+                || path.equals("/api/users/reset-password")
+                || path.startsWith("/api/items")
+                || path.startsWith("/swagger-ui")
+                || path.startsWith("/v3/api-docs")
+                || path.startsWith("/ws")
+                || path.startsWith("/api/test")
+                || path.startsWith("/api/return");
+          
+    }
+
+
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain)
             throws ServletException, IOException {
 
-        String path = request.getRequestURI();
-
-        // ✅ Skip JWT validation for public endpoints
-        if (path.startsWith("/api/auth") || path.startsWith("/api/items")) {
-            filterChain.doFilter(request, response);
-            return;
-        }
-
         String authHeader = request.getHeader("Authorization");
+        String path = request.getRequestURI();
         logger.debug("JWT Auth Filter triggered for URI: {}", path);
 
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
@@ -69,5 +81,4 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         filterChain.doFilter(request, response);
     }
-
 }

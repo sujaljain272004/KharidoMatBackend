@@ -40,44 +40,47 @@ public class BookingServiceImpl implements BookingService {
     private EmailService emailService;
 
     @Override
-    public Booking createBooking(Long itemId, String username, Booking bookingRequest) {
-        logger.info("Creating booking for item {} by user {}", itemId, username);
+    public Booking createBooking(Long itemId, String username, LocalDate startDate, LocalDate endDate) {
+        logger.info("Service: Creating booking for item {} by user {} from {} to {}", itemId, username, startDate, endDate);
 
-        Optional<Item> itemOpt = itemRepository.findById(itemId);
-        if (itemOpt.isEmpty()) {
-            logger.error("Item not found for ID {}", itemId);
-            throw new RuntimeException("Item not found");
-        }
-        Item item = itemOpt.get();
-
+        // 1. Find the User and Item from the database
+        // CORRECTED: Handle a nullable User object instead of an Optional
         User user = userRepository.findByEmail(username);
         if (user == null) {
-            logger.error("User not found with email {}", username);
-            throw new RuntimeException("User not found");
+            throw new IllegalArgumentException("User not found with email: " + username);
         }
 
+        Item item = itemRepository.findById(itemId)
+                .orElseThrow(() -> new IllegalArgumentException("Item not found with ID: " + itemId));
+        
+        // 2. Perform validation checks
         if (item.getUser().getEmail().equals(username)) {
-            logger.warn("User {} attempted to book their own item", username);
-            throw new RuntimeException("You cannot book your own item.");
+            logger.warn("User {} attempted to book their own item {}", username, itemId);
+            throw new IllegalArgumentException("You cannot book your own item.");
         }
 
-        List<Booking> conflicts = bookingRepository.findConflictingBookings(
-                itemId, bookingRequest.getStartDate(), bookingRequest.getEndDate());
-
+        List<Booking> conflicts = bookingRepository.findConflictingBookings(itemId, startDate, endDate);
         if (!conflicts.isEmpty()) {
-            logger.warn("Booking conflict for item {} between {} and {}", itemId, bookingRequest.getStartDate(), bookingRequest.getEndDate());
-            throw new RuntimeException("Item already booked for the selected dates.");
+            logger.warn("Booking conflict for item {} between {} and {}", itemId, startDate, endDate);
+            throw new IllegalArgumentException("Item is already booked for the selected dates.");
         }
+        
+        // 3. Create and populate the new Booking object
+        Booking newBooking = new Booking();
+        newBooking.setUser(user);
+        newBooking.setItem(item);
+        newBooking.setStartDate(startDate);
+        newBooking.setEndDate(endDate);
+        newBooking.setStatus(BookingStatus.ACTIVE); // Or PENDING, CONFIRMED, etc.
 
-        long days = ChronoUnit.DAYS.between(bookingRequest.getStartDate(), bookingRequest.getEndDate());
+        // 4. Calculate the total price
+        long days = ChronoUnit.DAYS.between(startDate, endDate) + 1; // Add 1 to include the start day
         double pricePerDay = item.getPricePerDay();
-        bookingRequest.setAmount(days * pricePerDay);
-        bookingRequest.setItem(item);
-        bookingRequest.setUser(user);
-        bookingRequest.setStatus(BookingStatus.ACTIVE);
+        newBooking.setAmount(days * pricePerDay);
 
-        logger.info("Booking created: itemId={}, user={}, amount={}", itemId, username, bookingRequest.getAmount());
-        return bookingRepository.save(bookingRequest);
+        // 5. Save the new booking and return it
+        logger.info("Booking created successfully: itemId={}, user={}, amount={}", itemId, username, newBooking.getAmount());
+        return bookingRepository.save(newBooking);
     }
 
     @Override
@@ -219,4 +222,10 @@ public class BookingServiceImpl implements BookingService {
         logger.info("Grouped bookings retrieved for {}", email);
         return result;
     }
+    
+    
+    public List<Booking> getBookingsByUserId(Long userId) {
+        return bookingRepository.findByUserId(userId);
+    }
+
 }
