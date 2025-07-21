@@ -44,6 +44,7 @@ public class SecurityConfig {
                 auth.requestMatchers(
                         // Authentication
                         "/api/users/register",
+                        "/api/users/complete-registration",
                         "/api/users/login",
                         "/api/users/verify",
                         "/api/users/forgot-password",
@@ -54,6 +55,8 @@ public class SecurityConfig {
                         "/api/items/{id}",
                         "/api/items/category/**",
                         "/api/items/image/**",
+                        "/api/items/upload-image",
+                        "/image/{fileName}",
                         // Swagger & Docs
                         "/swagger-ui/**",
                         "/v3/api-docs/**",
@@ -64,7 +67,7 @@ public class SecurityConfig {
                     // --- PROTECTED ENDPOINTS (Login required) ---
                     .requestMatchers(
                         // User-specific data
-                        "/api/users/dashboard", // Corrected endpoint name
+                        "/api/users/dashboard", 
                         "/api/users/wishlist/**",
                         // Item management
                         "/api/items/post",
