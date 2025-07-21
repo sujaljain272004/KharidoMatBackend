@@ -10,6 +10,11 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import java.util.List;
+
 import static org.springframework.security.config.Customizer.withDefaults;
 @Configuration
 public class SecurityConfig {
@@ -23,51 +28,60 @@ public class SecurityConfig {
         logger.info("SecurityConfig initialized with JwtAuthFilter");
     }
 
+ // In com.SpringProject.kharidoMat.config.SecurityConfig
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         logger.info("Configuring SecurityFilterChain...");
 
         http
-        .cors(withDefaults())
-         .csrf(csrf -> {
-                csrf.disable();
-                logger.debug("CSRF disabled");
-            })
+            .cors(withDefaults())
+            .csrf(csrf -> csrf.disable())
+            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
             .authorizeHttpRequests(auth -> {
-                auth
-                    .requestMatchers(
+                // --- PUBLIC ENDPOINTS (No login required) ---
+                auth.requestMatchers(
+                        // Authentication
                         "/api/users/register",
-                        "/api/users/complete-registration",
-                        "/api/users/login",          
+                        "/api/users/login",
                         "/api/users/verify",
                         "/api/users/forgot-password",
                         "/api/users/reset-password",
-                        "/api/items/search", 
-                        "/api/items/**", 
-                        "/api/items/image/**", 
+                        // Public Item routes
+                        "/api/items/all",
+                        "/api/items/search",
+                        "/api/items/{id}",
                         "/api/items/category/**",
-                        "/api/users/wishlist/**",
-                        "/api/test/**", 
-                        "/ws/**",
-                        "/api/return/**",
+                        "/api/items/image/**",
+                        // Swagger & Docs
                         "/swagger-ui/**",
-                        "/v3/api-docs/**"
-                    ).permitAll();
-                logger.debug("Public endpoints permitted");
+                        "/v3/api-docs/**",
+                        // WebSocket connection
+                        "/ws/**"
+                    ).permitAll()
 
-                auth.anyRequest().authenticated();
-                logger.debug("Other endpoints require authentication");
-            })
-            .sessionManagement(session -> {
-                session.sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-                logger.debug("Session management set to STATELESS");
-            })
-            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+                    // --- PROTECTED ENDPOINTS (Login required) ---
+                    .requestMatchers(
+                        // User-specific data
+                        "/api/users/dashboard", // Corrected endpoint name
+                        "/api/users/wishlist/**",
+                        // Item management
+                        "/api/items/post",
+                        "/api/items/my",
+                        "/api/items/upload-image/**",
+                        // Booking management
+                        "/api/bookings/**"
+                    ).authenticated()
+
+                    // --- DEFAULT RULE ---
+                    // Any other request not listed above must be authenticated.
+                    .anyRequest().authenticated();
+            });
 
         logger.info("SecurityFilterChain configured successfully");
         return http.build();
     }
-
     @Bean
     public PasswordEncoder passwordEncoder() {
         logger.debug("BCryptPasswordEncoder bean created");
@@ -75,4 +89,16 @@ public class SecurityConfig {
     }
     
     
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        // IMPORTANT: Change this to your frontend's actual URL
+        configuration.setAllowedOrigins(List.of("http://localhost:5173"));
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
+        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Auth-Token"));
+        configuration.setAllowCredentials(true);
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
+    }
 }

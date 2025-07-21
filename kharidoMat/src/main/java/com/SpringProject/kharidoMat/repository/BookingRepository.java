@@ -13,6 +13,8 @@ import com.SpringProject.kharidoMat.model.User;
 public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     List<Booking> findByUser(User user);
+    
+    List<Booking> findByUserId(Long userId);
 
     @Query("SELECT b FROM Booking b WHERE b.item.user = :owner")
     List<Booking> findBookingsByItemOwner(@Param("owner") User owner);
