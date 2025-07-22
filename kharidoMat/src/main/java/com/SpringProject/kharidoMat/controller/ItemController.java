@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.SpringProject.kharidoMat.dto.ItemDetailResponseDTO;
 import com.SpringProject.kharidoMat.model.Item;
 import com.SpringProject.kharidoMat.service.ItemService;
 import com.SpringProject.kharidoMat.util.FileUploadUtil;
@@ -118,7 +119,12 @@ public class ItemController {
         logger.info("Fetching item with ID {}", id);
         try {
             Item item = itemService.getItemById(id);
-            return ResponseEntity.ok(item);
+            
+            // --- MODIFIED PART ---
+            // Instead of returning the raw item, create and return the DTO
+            ItemDetailResponseDTO responseDTO = new ItemDetailResponseDTO(item);
+            return ResponseEntity.ok(responseDTO);
+            
         } catch (Exception e) {
             logger.error("Failed to fetch item with ID {}: {}", id, e.getMessage());
             return ResponseEntity.status(404).body("Item not found");

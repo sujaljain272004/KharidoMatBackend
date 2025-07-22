@@ -15,7 +15,8 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
+    
+    @Column
     private String fullName;
 
     @Column(unique = true)
@@ -27,6 +28,15 @@ public class User {
     private String studentId;
     
     private boolean verified = false;          // has user confirmed email?
+    
+    @Column
+    private String phone;
+
+    @Column
+    private String prn;
+
+    @Column
+    private String academicYear;
     
     @Enumerated(EnumType.STRING)
     private Role role;
@@ -88,6 +98,32 @@ public class User {
 	public void setVerified(boolean verified) {
 		this.verified = verified;
 	}
+
+
+	public String getPhone() {
+		return phone;
+	}
+
+	public void setPhone(String phone) {
+		this.phone = phone;
+	}
+
+	public String getPrn() {
+		return prn;
+	}
+
+	public void setPrn(String prn) {
+		this.prn = prn;
+	}
+
+	public String getAcademicYear() {
+		return academicYear;
+	}
+
+	public void setAcademicYear(String academicYear) {
+		this.academicYear = academicYear;
+	}
+
 
 
 
