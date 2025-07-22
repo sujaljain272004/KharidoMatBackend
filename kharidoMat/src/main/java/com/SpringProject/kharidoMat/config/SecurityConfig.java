@@ -56,7 +56,8 @@ public class SecurityConfig {
                         "/api/items/category/**",
                         "/api/items/image/**",
                         "/api/items/upload-image",
-                        "/image/{fileName}",
+                        "/api/items/image/{fileName}",
+                        "/api/users/edit-profile",
                         // Swagger & Docs
                         "/swagger-ui/**",
                         "/v3/api-docs/**",
@@ -69,6 +70,7 @@ public class SecurityConfig {
                         // User-specific data
                         "/api/users/dashboard", 
                         "/api/users/wishlist/**",
+                        "/api/users/edit-profile",
                         // Item management
                         "/api/items/post",
                         "/api/items/my",
