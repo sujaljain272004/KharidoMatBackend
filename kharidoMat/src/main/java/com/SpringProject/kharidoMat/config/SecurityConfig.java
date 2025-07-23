@@ -2,6 +2,7 @@ package com.SpringProject.kharidoMat.config;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -22,6 +23,11 @@ public class SecurityConfig {
     private static final Logger logger = LoggerFactory.getLogger(SecurityConfig.class);
     
     private final JwtAuthFilter jwtAuthFilter;
+    
+    
+    @Autowired
+    private CustomOAuth2SuccessHandler oAuth2SuccessHandler;
+
 
     public SecurityConfig(JwtAuthFilter jwtAuthFilter) {
         this.jwtAuthFilter = jwtAuthFilter;
@@ -38,18 +44,16 @@ public class SecurityConfig {
             .cors(withDefaults())
             .csrf(csrf -> csrf.disable())
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
             .authorizeHttpRequests(auth -> {
-                // --- PUBLIC ENDPOINTS (No login required) ---
-                auth.requestMatchers(
-                        // Authentication
+                auth
+                    // --- PUBLIC ENDPOINTS (No login required) ---
+                    .requestMatchers(
                         "/api/users/register",
                         "/api/users/complete-registration",
                         "/api/users/login",
                         "/api/users/verify",
                         "/api/users/forgot-password",
                         "/api/users/reset-password",
-                        // Public Item routes
                         "/api/items/all",
                         "/api/items/search",
                         "/api/items/{id}",
@@ -58,35 +62,37 @@ public class SecurityConfig {
                         "/api/items/upload-image",
                         "/api/items/image/{fileName}",
                         "/api/users/edit-profile",
-                        // Swagger & Docs
                         "/swagger-ui/**",
                         "/v3/api-docs/**",
-                        // WebSocket connection
-                        "/ws/**"
+                        "/ws/**",
+                        "/oauth2/**",                          // ✅ OAuth2 endpoints
+                        "/login/oauth2/**",                    // ✅ Redirect URIs
+                        "/oauth2/authorization/**"            // ✅ Initiate Google login
                     ).permitAll()
 
-                    // --- PROTECTED ENDPOINTS (Login required) ---
+                    // --- PROTECTED ENDPOINTS ---
                     .requestMatchers(
-                        // User-specific data
-                        "/api/users/dashboard", 
+                        "/api/users/dashboard",
                         "/api/users/wishlist/**",
                         "/api/users/edit-profile",
-                        // Item management
                         "/api/items/post",
                         "/api/items/my",
                         "/api/items/upload-image/**",
-                        // Booking management
                         "/api/bookings/**"
                     ).authenticated()
 
-                    // --- DEFAULT RULE ---
-                    // Any other request not listed above must be authenticated.
                     .anyRequest().authenticated();
-            });
+            })
+            .oauth2Login(oauth2 -> oauth2      // ✅ Enable OAuth2 Login
+            		.successHandler(oAuth2SuccessHandler)
+
+            )
+            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class); // ✅ JWT support
 
         logger.info("SecurityFilterChain configured successfully");
         return http.build();
     }
+
     @Bean
     public PasswordEncoder passwordEncoder() {
         logger.debug("BCryptPasswordEncoder bean created");
