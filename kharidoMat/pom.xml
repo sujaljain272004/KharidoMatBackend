@@ -58,7 +58,13 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-mail</artifactId>
 		</dependency>
+        
 
+<dependency>
+    <groupId>org.postgresql</groupId>
+    <artifactId>postgresql</artifactId>
+    <scope>runtime</scope>
+</dependency>
 		<!-- Swagger: Springdoc OpenAPI 3 -->
 		<dependency>
 			<groupId>org.springdoc</groupId>
@@ -125,11 +131,7 @@
 			<scope>runtime</scope>
 		</dependency>
 
-		<dependency>
-			<groupId>mysql</groupId>
-			<artifactId>mysql-connector-java</artifactId>
-			<version>8.0.33</version>
-		</dependency>
+	
 
 		<dependency>
 			<groupId>com.razorpay</groupId>
