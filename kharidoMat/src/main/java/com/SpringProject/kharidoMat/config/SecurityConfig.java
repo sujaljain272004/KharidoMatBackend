@@ -67,15 +67,15 @@ public class SecurityConfig {
 
                     // --- PROTECTED ENDPOINTS (Login required) ---
                     .requestMatchers(
-                        // User-specific data
+                     
                         "/api/users/dashboard", 
                         "/api/users/wishlist/**",
                         "/api/users/edit-profile",
-                        // Item management
+                       
                         "/api/items/post",
                         "/api/items/my",
                         "/api/items/upload-image/**",
-                        // Booking management
+                       
                         "/api/bookings/**"
                     ).authenticated()
 
