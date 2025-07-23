@@ -18,7 +18,8 @@ RUN mvn clean install -DskipTests
 # --------------------------------------------------------------------
 
 # Stage 2: Use a lightweight Java 22 image to run the app
-FROM eclipse-temurin:22-jdk-slim
+# This stage creates the final, small container for deployment
+FROM eclipse-temurin:22-jdk
 
 # Set the working directory
 WORKDIR /app
