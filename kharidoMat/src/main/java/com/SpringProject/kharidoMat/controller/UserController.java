@@ -17,6 +17,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import com.SpringProject.kharidoMat.dto.EditProfileRequest;
+import com.SpringProject.kharidoMat.dto.UserDTO;
 import com.SpringProject.kharidoMat.model.*;
 import com.SpringProject.kharidoMat.repository.UserRepository;
 import com.SpringProject.kharidoMat.service.OTPService;
@@ -192,6 +193,21 @@ public class UserController {
 
         return ResponseEntity.ok("Profile updated successfully");
     }
-
-
+    
+    @GetMapping("/profile")
+    public ResponseEntity<UserDTO> getUserProfile(Authentication authentication) {
+        // Spring Security's Authentication object holds the user's email (principal)
+        String email = authentication.getName();
+        
+        // Find the user in the database
+        User user = userRepository.findByEmail(email);
+        if (user == null) {
+            throw new UsernameNotFoundException("User not found with email: " + email);
+        }
+        
+        // Convert the User entity to a safe DTO and return it
+        UserDTO userDTO = new UserDTO(user);
+        
+        return ResponseEntity.ok(userDTO);
+    }
 }

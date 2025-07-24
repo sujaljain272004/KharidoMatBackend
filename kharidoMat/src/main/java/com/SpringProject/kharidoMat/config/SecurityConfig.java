@@ -14,6 +14,9 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import jakarta.servlet.http.HttpServletResponse;
+
 import java.util.List;
 
 import static org.springframework.security.config.Customizer.withDefaults;
@@ -43,7 +46,20 @@ public class SecurityConfig {
         http
             .cors(withDefaults())
             .csrf(csrf -> csrf.disable())
-            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+
+            // ✅ DEFINE ONCE: Use stateless sessions for a REST API
+            .sessionManagement(session -> session
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+            )
+
+            // ✅ DEFINE ONCE: Return a 401 error for unauthenticated API requests instead of redirecting
+            .exceptionHandling(exceptions -> exceptions
+                .authenticationEntryPoint((request, response, authException) ->
+                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized")
+                )
+            )
+
+            // ✅ DEFINE ONCE: All your authorization rules go in this single block
             .authorizeHttpRequests(auth -> {
                 auth
                     // --- PUBLIC ENDPOINTS (No login required) ---
@@ -58,16 +74,13 @@ public class SecurityConfig {
                         "/api/items/search",
                         "/api/items/{id}",
                         "/api/items/category/**",
-                        "/api/items/image/**",
-                        "/api/items/upload-image",
                         "/api/items/image/{fileName}",
-                        "/api/users/edit-profile",
                         "/swagger-ui/**",
                         "/v3/api-docs/**",
                         "/ws/**",
-                        "/oauth2/**",                          // ✅ OAuth2 endpoints
-                        "/login/oauth2/**",                    // ✅ Redirect URIs
-                        "/oauth2/authorization/**"            // ✅ Initiate Google login
+                        "/oauth2/**",
+                        "/login/oauth2/**",
+                        "/oauth2/authorization/**"
                     ).permitAll()
 
                     // --- PROTECTED ENDPOINTS ---
@@ -78,21 +91,21 @@ public class SecurityConfig {
                         "/api/items/post",
                         "/api/items/my",
                         "/api/items/upload-image/**",
-                        "/api/bookings/**"
+                        "/api/bookings/**",
+                        "/api/chats/**"
                     ).authenticated()
 
+                    // --- CATCH-ALL: Any other request must be authenticated ---
                     .anyRequest().authenticated();
             })
-            .oauth2Login(oauth2 -> oauth2      // ✅ Enable OAuth2 Login
-            		.successHandler(oAuth2SuccessHandler)
-
+            .oauth2Login(oauth2 -> oauth2
+                    .successHandler(oAuth2SuccessHandler)
             )
-            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class); // ✅ JWT support
+            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         logger.info("SecurityFilterChain configured successfully");
         return http.build();
     }
-
     @Bean
     public PasswordEncoder passwordEncoder() {
         logger.debug("BCryptPasswordEncoder bean created");
