@@ -1,37 +1,59 @@
 package com.SpringProject.kharidoMat.model;
 
+import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
+@Entity
+@Table(name = "chat_messages") // Specifies the table name in the database
 public class ChatMessage {
 
-    private String senderEmail;
-    private String recieverEmail;
-    private String content;
-    private LocalDateTime time;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
+    // The user who sent the message
+    @ManyToOne
+    @JoinColumn(name = "sender_id", nullable = false)
+    private User sender;
+
+    // The chat room this message belongs to
+    @ManyToOne
+    @JoinColumn(name = "chat_room_id", nullable = false)
+    private ChatRoom chatRoom;
+
+    @Column(nullable = false, columnDefinition = "TEXT")
+    private String content;
+
+    @Column(nullable = false)
+    private LocalDateTime timestamp;
+
+    // Constructors
     public ChatMessage() {
     }
 
-    public ChatMessage(String senderEmail, String recieverEmail, String content, LocalDateTime time) {
-        this.senderEmail = senderEmail;
-        this.recieverEmail = recieverEmail;
-        this.content = content;
-        this.time = time;
+    // Getters and Setters
+    public Long getId() {
+        return id;
     }
 
-    public String getSenderEmail() {
-        return senderEmail;
-    }
-    public void setSenderEmail(String senderEmail) {
-        this.senderEmail = senderEmail;
+    public void setId(Long id) {
+        this.id = id;
     }
 
-    public String getRecieverEmail() {
-        return recieverEmail;
+    public User getSender() {
+        return sender;
     }
 
-    public void setRecieverEmail(String recieverEmail) {
-        this.recieverEmail = recieverEmail;
+    public void setSender(User sender) {
+        this.sender = sender;
+    }
+
+    public ChatRoom getChatRoom() {
+        return chatRoom;
+    }
+
+    public void setChatRoom(ChatRoom chatRoom) {
+        this.chatRoom = chatRoom;
     }
 
     public String getContent() {
@@ -42,12 +64,11 @@ public class ChatMessage {
         this.content = content;
     }
 
-    public LocalDateTime getTime() {
-        return time;
+    public LocalDateTime getTimestamp() {
+        return timestamp;
     }
 
-    public void setTime(LocalDateTime time) {
-        this.time = time;
+    public void setTimestamp(LocalDateTime timestamp) {
+        this.timestamp = timestamp;
     }
 }
-
