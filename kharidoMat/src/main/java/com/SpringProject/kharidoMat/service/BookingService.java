@@ -4,12 +4,14 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
+import com.SpringProject.kharidoMat.dto.BookingDTO;
 import com.SpringProject.kharidoMat.model.Booking;
 
 public interface BookingService {
 	Booking createBooking(Long itemId, String username, LocalDate startDate, LocalDate endDate);
 
-	List<Booking> getBookingByUser(String username);
+	// The new, correct return type
+	List<BookingDTO> getBookingByUser(String username);
 
 	List<Booking> getBookingsForOwner(String username);
 

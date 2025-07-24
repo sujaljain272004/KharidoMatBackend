@@ -1,8 +1,12 @@
 package com.SpringProject.kharidoMat.serviceImpl;
 
 import java.time.LocalDate;
+import com.SpringProject.kharidoMat.dto.BookingDTO; // Import DTOs
+import com.SpringProject.kharidoMat.dto.ItemDTO;
+import com.SpringProject.kharidoMat.dto.UserDTO;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -83,8 +87,10 @@ public class BookingServiceImpl implements BookingService {
         return bookingRepository.save(newBooking);
     }
 
+ // In BookingService.java
+
     @Override
-    public List<Booking> getBookingByUser(String username) {
+    public List<BookingDTO> getBookingByUser(String username) {
         logger.info("Fetching bookings for user {}", username);
 
         User user = userRepository.findByEmail(username);
@@ -93,7 +99,36 @@ public class BookingServiceImpl implements BookingService {
             throw new UsernameNotFoundException("User not found");
         }
 
-        return bookingRepository.findByUser(user);
+        List<Booking> bookings = bookingRepository.findByUser(user);
+        
+        return bookings.stream().map(booking -> {
+        	
+        	logger.info("Mapping booking ID {}. Owner Name from DB: '{}'", 
+                    booking.getId(), booking.getItem().getUser().getFullName());
+            BookingDTO dto = new BookingDTO();
+            dto.setId(booking.getId());
+            dto.setStartDate(booking.getStartDate());
+            dto.setEndDate(booking.getEndDate());
+            dto.setTotalAmount(booking.getAmount());
+            dto.setStatus(booking.getStatus());
+
+            ItemDTO itemDto = new ItemDTO();
+            itemDto.setId(booking.getItem().getId());
+            // FIX #1: Use getTitle() instead of getName()
+            itemDto.setName(booking.getItem().getTitle()); 
+            // FIX #2: Use getImageName() instead of getImageUrl()
+            itemDto.setImageUrl(booking.getItem().getImageName()); 
+            itemDto.setPricePerDay(booking.getItem().getPricePerDay());
+            dto.setItem(itemDto);
+
+            UserDTO ownerDto = new UserDTO(user);
+            ownerDto.setId(booking.getItem().getUser().getId());
+            ownerDto.setFullName(booking.getItem().getUser().getFullName());
+            ownerDto.setEmail(booking.getItem().getUser().getEmail());
+            dto.setOwner(ownerDto);
+            
+            return dto;
+        }).collect(Collectors.toList());
     }
 
     @Override
