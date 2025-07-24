@@ -24,5 +24,8 @@ public interface BookingService {
 	Map<String, List<Booking>> getBookingsGroupedByStatus(String email);
 	
 	List<Booking> getBookingsByUserId(Long userId);
+	
+	// In BookingService.java interface
+	List<BookingDTO> getPendingReturnsForOwner(String ownerUsername);
 
 }

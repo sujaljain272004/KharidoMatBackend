@@ -207,5 +207,20 @@ public class BookingController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred.");
         }
     }
+    
+ // In BookingController.java
+
+    @GetMapping("/returns/pending-for-owner")
+    public ResponseEntity<List<BookingDTO>> getPendingReturnsForOwner(Authentication authentication) {
+        // 1. Get the currently logged-in user's email (who is the item owner)
+        String ownerUsername = authentication.getName();
+        logger.info("Fetching pending returns for owner '{}'", ownerUsername);
+
+        // 2. Call the new service method you just created
+        List<BookingDTO> pendingReturns = bookingService.getPendingReturnsForOwner(ownerUsername);
+
+        // 3. Return the list of pending bookings to the frontend
+        return ResponseEntity.ok(pendingReturns);
+    }
 
 }
