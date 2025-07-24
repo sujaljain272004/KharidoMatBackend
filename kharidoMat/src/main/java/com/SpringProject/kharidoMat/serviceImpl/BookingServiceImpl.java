@@ -262,5 +262,50 @@ public class BookingServiceImpl implements BookingService {
     public List<Booking> getBookingsByUserId(Long userId) {
         return bookingRepository.findByUserId(userId);
     }
+    
+ // In BookingServiceImpl.java
+
+    public List<BookingDTO> getPendingReturnsForOwner(String ownerUsername) {
+        logger.info("Fetching pending returns for owner '{}'", ownerUsername);
+
+        // Find the owner from the database
+        User owner = userRepository.findByEmail(ownerUsername);
+        if (owner == null) {
+            throw new UsernameNotFoundException("Owner not found with email: " + ownerUsername);
+        }
+
+        // Get all bookings that are awaiting verification
+        List<Booking> pendingBookings = bookingRepository.findByReturnStatus("pending_verification");
+
+        // Filter this list to include only items owned by the current user
+        // And convert them to DTOs to send to the frontend
+        return pendingBookings.stream()
+            .filter(booking -> booking.getItem().getUser().equals(owner))
+            .map(booking -> {
+                // This is the same DTO mapping logic from your getBookingByUser method
+                BookingDTO dto = new BookingDTO();
+                dto.setId(booking.getId());
+                dto.setStartDate(booking.getStartDate());
+                dto.setEndDate(booking.getEndDate());
+                dto.setTotalAmount(booking.getAmount());
+                dto.setStatus(booking.getStatus());
+
+                ItemDTO itemDto = new ItemDTO();
+                itemDto.setId(booking.getItem().getId());
+                itemDto.setName(booking.getItem().getTitle());
+                itemDto.setImageUrl(booking.getItem().getImageName());
+                itemDto.setPricePerDay(booking.getItem().getPricePerDay());
+                dto.setItem(itemDto);
+
+                // Here, the 'owner' is still the item owner, which is the current user
+                UserDTO ownerDto = new UserDTO(owner);
+                ownerDto.setId(booking.getItem().getUser().getId());
+                ownerDto.setFullName(booking.getItem().getUser().getFullName());
+                ownerDto.setEmail(booking.getItem().getUser().getEmail());
+                dto.setOwner(ownerDto);
+                
+                return dto;
+            }).collect(Collectors.toList());
+    }
 
 }
