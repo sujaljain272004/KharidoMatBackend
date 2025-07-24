@@ -15,7 +15,7 @@ public class UserDTO {
     // This constructor converts a User database entity into a safe DTO
     public UserDTO(User user) {
         this.id = user.getId();
-        this.fullName = user.getFullName(); // Assumes your User model has getFullName()
+        this.fullName = user.getFullName(); 
         this.email = user.getEmail();
         this.phone = user.getPhone();
         this.prn = user.getPrn();

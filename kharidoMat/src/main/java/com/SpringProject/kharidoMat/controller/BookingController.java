@@ -14,6 +14,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import com.SpringProject.kharidoMat.dto.BookingDTO;
+import com.SpringProject.kharidoMat.dto.BookingRequestDTO;
 import com.SpringProject.kharidoMat.model.Booking;
 import com.SpringProject.kharidoMat.repository.BookingRepository;
 import com.SpringProject.kharidoMat.service.BookingService;
@@ -60,10 +62,10 @@ public class BookingController {
     }
 
     @GetMapping("/my")
-    public ResponseEntity<List<Booking>> getMyBookings(Authentication authentication) {
+    public ResponseEntity<List<BookingDTO>> getMyBookings(Authentication authentication) {
         String username = authentication.getName();
         logger.info("Fetching bookings for user '{}'", username);
-        List<Booking> bookings = bookingService.getBookingByUser(username);
+        List<BookingDTO> bookings = bookingService.getBookingByUser(username);
         return ResponseEntity.ok(bookings);
     }
 
@@ -177,6 +179,33 @@ public class BookingController {
         logger.info("Fetching bookings for user ID {}", userId);
         List<Booking> bookings = bookingService.getBookingsByUserId(userId);
         return ResponseEntity.ok(bookings);
+    }
+    
+    @PostMapping
+    public ResponseEntity<?> createBooking(@RequestBody BookingRequestDTO bookingRequest, 
+                                           Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User must be logged in.");
+        }
+
+        String userEmail = authentication.getName();
+        logger.info("Booking request by user '{}' for item ID {}", userEmail, bookingRequest.getItemId());
+
+        try {
+            Booking booking = bookingService.createBooking(
+                bookingRequest.getItemId(),
+                userEmail,
+                bookingRequest.getStartDate(),
+                bookingRequest.getEndDate()
+            );
+            return ResponseEntity.status(HttpStatus.CREATED).body(booking);
+        } catch (IllegalArgumentException e) {
+            logger.warn("Booking creation failed: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        } catch (Exception e) {
+            logger.error("Unexpected error during booking creation", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred.");
+        }
     }
 
 }
