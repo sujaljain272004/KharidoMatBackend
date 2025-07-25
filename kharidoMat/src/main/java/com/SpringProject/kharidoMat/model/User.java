@@ -27,7 +27,7 @@ public class User {
 
     private String studentId;
     
-    private boolean verified = false;          // has user confirmed email?
+    private boolean verified = false;          
     
     @Column
     private String phone;
