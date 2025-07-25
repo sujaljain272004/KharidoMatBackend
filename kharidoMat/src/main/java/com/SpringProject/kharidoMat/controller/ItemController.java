@@ -2,12 +2,15 @@ package com.SpringProject.kharidoMat.controller;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -60,19 +63,34 @@ public class ItemController {
         logger.info("Uploading image for item ID {}", itemId);
         try {
             Item item = itemService.getItemById(itemId);
+            if (item == null) {
+                logger.error("Item not found with ID: {}", itemId);
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Item not found.");
+            }
+
             String fileName = file.getOriginalFilename();
+            logger.info("Original filename: {}", fileName);
 
             FileUploadUtil.saveFile("images", fileName, file);
 
             item.setImageName(fileName);
+            logger.info("Image name set to item: {}", fileName);
+
             itemService.saveItem(item);
-            logger.info("Image '{}' uploaded successfully for item ID {}", fileName, itemId);
-            return ResponseEntity.ok("Image uploaded successfully");
+            logger.info("Item updated in DB with image name.");
+
+            Map<String, String> response = new HashMap<>();
+            response.put("message", "Image uploaded successfully");
+            response.put("imageName", fileName);
+            return ResponseEntity.ok(response);
+
         } catch (Exception e) {
             logger.error("Image upload failed for item ID {}: {}", itemId, e.getMessage());
             return ResponseEntity.status(500).body("Image upload failed: " + e.getMessage());
         }
     }
+
+
 
     @GetMapping("/image/{fileName}")
     public ResponseEntity<?> getImage(@PathVariable String fileName) throws IOException {
