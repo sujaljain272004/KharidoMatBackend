@@ -3,7 +3,6 @@ package com.SpringProject.kharidoMat.service;
 import java.util.List;
 import java.util.Set;
 
-import com.SpringProject.kharidoMat.model.DashboardStats;
 import com.SpringProject.kharidoMat.model.Item;
 import com.SpringProject.kharidoMat.model.User;
 
@@ -21,8 +20,6 @@ public interface UserService {
 	void removeFromWishlist(String email, Long itemId);
 
 	Set<Item> getWishlist(String email);
-
-	DashboardStats getUserStats(Long userId, String role);
 
 	boolean verifyEmail(String email, String otp);
 	

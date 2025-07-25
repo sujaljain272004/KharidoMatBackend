@@ -1,8 +1,5 @@
 package com.SpringProject.kharidoMat.repository;
 
-
-
-
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -32,7 +29,6 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
 	 int countByOwnerId(@Param("ownerId") Long ownerId);
 	 
 	 List<Item> findByUser(User user);
-
 
 	 
 }
