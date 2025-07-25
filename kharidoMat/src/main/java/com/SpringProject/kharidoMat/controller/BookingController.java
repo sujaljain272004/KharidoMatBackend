@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import com.SpringProject.kharidoMat.dto.BookingDTO;
 import com.SpringProject.kharidoMat.dto.BookingDateDto;
 import com.SpringProject.kharidoMat.dto.BookingRequestDTO;
+import com.SpringProject.kharidoMat.enums.BookingStatus;
 import com.SpringProject.kharidoMat.model.Booking;
 import com.SpringProject.kharidoMat.repository.BookingRepository;
 import com.SpringProject.kharidoMat.service.BookingService;
@@ -122,6 +123,8 @@ public class BookingController {
         return bookingRepository.findByReturnStatus("pending_verification");
     }
 
+ // In your BookingController.java
+
     @PostMapping("/return/verify/{bookingId}")
     public ResponseEntity<String> verifyReturn(@PathVariable Long bookingId,
                                                @RequestParam boolean accepted) {
@@ -131,12 +134,14 @@ public class BookingController {
         if (accepted) {
             booking.setReturned(true);
             booking.setReturnStatus("confirmed");
+            booking.setStatus(BookingStatus.COMPLETED); // <-- ADD THIS LINE
+
         } else {
             booking.setReturnStatus("rejected");
         }
 
         bookingRepository.save(booking);
-        return ResponseEntity.ok("Return " + (accepted ? "confirmed" : "rejected"));
+        return ResponseEntity.ok("Return " + (accepted ? "confirmed and booking completed" : "rejected"));
     }
 
     @PostMapping("/return/request-otp/{bookingId}")
@@ -155,6 +160,10 @@ public class BookingController {
         return ResponseEntity.ok("OTP sent to registered email.");
     }
 
+ // In your BookingController.java
+
+ // In your BookingController.java
+
     @PostMapping("/return/verify-otp/{bookingId}")
     public ResponseEntity<String> verifyOtp(@PathVariable Long bookingId,
                                             @RequestParam String otp) {
@@ -163,13 +172,18 @@ public class BookingController {
 
         if (otp.equals(booking.getOtpCode()) &&
             LocalDateTime.now().isBefore(booking.getOtpExpiry())) {
-            booking.setReturnStatus("pending_verification");
-            booking.setReturned(false);
+            
+            // --- CORRECTED LOGIC ---
+            // Instead of completing, we set it to 'pending' for the owner.
+            booking.setReturnStatus("pending_verification"); 
+            booking.setReturned(false); // It's not officially returned yet.
             booking.setOtpCode(null);
             booking.setOtpExpiry(null);
+            
             bookingRepository.save(booking);
-            logger.info("OTP verified for booking ID {}", bookingId);
-            return ResponseEntity.ok("OTP verified. Return pending lender verification.");
+
+            logger.info("OTP verified for booking ID {}. Return is now pending owner verification.", bookingId);
+            return ResponseEntity.ok("OTP verified. Return is now pending owner verification.");
         }
 
         logger.warn("Invalid or expired OTP for booking ID {}", bookingId);
