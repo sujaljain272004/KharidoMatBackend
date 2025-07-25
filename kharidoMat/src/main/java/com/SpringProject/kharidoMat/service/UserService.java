@@ -22,7 +22,6 @@ public interface UserService {
 
 	Set<Item> getWishlist(String email);
 
-	DashboardStats getUserStats(Long userId, String role);
 
 	boolean verifyEmail(String email, String otp);
 	

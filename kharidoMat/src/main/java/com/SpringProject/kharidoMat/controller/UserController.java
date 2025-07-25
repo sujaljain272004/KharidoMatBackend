@@ -130,14 +130,7 @@ public class UserController {
         return ResponseEntity.ok(userService.getWishlist(email));
     }
 
-    @GetMapping("/dashboard")
-    public ResponseEntity<DashboardStats> getDashboardStats(Authentication auth) {
-        String email = auth.getName();
-        log.info("Fetching dashboard stats for {}", email);
-        User user = userRepository.findByEmail(email);
-        DashboardStats stats = userService.getUserStats(user.getId(), user.getRole().name());
-        return ResponseEntity.ok(stats);
-    }
+    
 
     @PostMapping("/forgot-password")
     public ResponseEntity<String> forgotPassword(@RequestBody Map<String, String> request) {

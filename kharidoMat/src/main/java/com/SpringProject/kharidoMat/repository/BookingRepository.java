@@ -15,6 +15,8 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     List<Booking> findByUser(User user);
     
     List<Booking> findByUserId(Long userId);
+    
+    List<Booking> findAllByUserEmail(String email);
 
     @Query("SELECT b FROM Booking b WHERE b.item.user = :owner")
     List<Booking> findBookingsByItemOwner(@Param("owner") User owner);
@@ -40,14 +42,9 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     @Query("SELECT b FROM Booking b WHERE b.user = :user AND b.status = 'ACTIVE' AND b.endDate < :today")
     List<Booking> findPastBookings(@Param("user") User user, @Param("today") LocalDate today);
 
-    @Query("SELECT COUNT(b) FROM Booking b WHERE b.user.id = :userId")
     int countByUserId(@Param("userId") Long userId);
 
-    @Query("SELECT SUM(i.pricePerDay) FROM Booking b JOIN b.item i WHERE b.user.id = :userId AND b.status = 'APPROVED'")
-    Double getTotalSpentByUser(@Param("userId") Long userId);
 
-    @Query("SELECT SUM(i.pricePerDay) FROM Booking b JOIN b.item i WHERE i.user.id = :ownerId AND b.status = 'APPROVED'")
-    Double getTotalEarningsByOwner(@Param("ownerId") Long ownerId);
     
     List<Booking> findAllByItemId(Long itemId);
 }

@@ -93,37 +93,38 @@ public class SecurityConfig {
                         "/api/items/upload-image/**",
                         "/api/bookings/**",
                         "/api/chats/**",
-                        "/{itemId}/bookings"
-                    ).authenticated()
+                        "/api/reviews/can-review/{itemId}",
+                        "/api/reviews/{itemId}",
+                        "/api/bookings/{bookingId}/create-extension-order/**",
+                        "/api/bookings/{bookingId}/verify-and-extend/**"
+                    )
+							.authenticated()
 
-                    // --- CATCH-ALL: Any other request must be authenticated ---
-                    .anyRequest().authenticated();
-            })
-            .oauth2Login(oauth2 -> oauth2
-                    .successHandler(oAuth2SuccessHandler)
-            )
-            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+							// --- CATCH-ALL: Any other request must be authenticated ---
+							.anyRequest().authenticated();
+				}).oauth2Login(oauth2 -> oauth2.successHandler(oAuth2SuccessHandler))
+				.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
-        logger.info("SecurityFilterChain configured successfully");
-        return http.build();
-    }
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        logger.debug("BCryptPasswordEncoder bean created");
-        return new BCryptPasswordEncoder();
-    }
-    
-    
-    @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
-        // IMPORTANT: Change this to your frontend's actual URL
-        configuration.setAllowedOrigins(List.of("http://localhost:5173"));
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
-        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Auth-Token"));
-        configuration.setAllowCredentials(true);
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
-        return source;
-    }
+		logger.info("SecurityFilterChain configured successfully");
+		return http.build();
+	}
+
+	@Bean
+	public PasswordEncoder passwordEncoder() {
+		logger.debug("BCryptPasswordEncoder bean created");
+		return new BCryptPasswordEncoder();
+	}
+
+	@Bean
+	public CorsConfigurationSource corsConfigurationSource() {
+		CorsConfiguration configuration = new CorsConfiguration();
+		// IMPORTANT: Change this to your frontend's actual URL
+		configuration.setAllowedOrigins(List.of("http://localhost:5173"));
+		configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
+		configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Auth-Token"));
+		configuration.setAllowCredentials(true);
+		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+		source.registerCorsConfiguration("/**", configuration);
+		return source;
+	}
 }

@@ -21,10 +21,21 @@ public class UserDTO {
         this.prn = user.getPrn();
         this.academicYear = user.getAcademicYear();
     }
+    
+    
 
     // --- Getters and Setters ---
 
-    public Long getId() {
+    public UserDTO() {
+		super();
+		// TODO Auto-generated constructor stub
+	}
+    
+    public UserDTO(String name) { 
+    	this.fullName = name;
+    	}
+
+	public Long getId() {
         return id;
     }
 
