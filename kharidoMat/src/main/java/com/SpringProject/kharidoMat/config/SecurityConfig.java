@@ -85,7 +85,7 @@ public class SecurityConfig {
 
                     // --- PROTECTED ENDPOINTS ---
                     .requestMatchers(
-                        "/api/users/dashboard",
+                        "/api/dashboard/stats/**",
                         "/api/users/wishlist/**",
                         "/api/users/edit-profile",
                         "/api/items/post",
@@ -117,7 +117,7 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         // IMPORTANT: Change this to your frontend's actual URL
-        configuration.setAllowedOrigins(List.of("http://localhost:5173"));
+        configuration.setAllowedOrigins(List.of("http://localhost:5173","http://127.0.0.1:5173/"));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Auth-Token"));
         configuration.setAllowCredentials(true);

@@ -40,12 +40,13 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     @Query("SELECT b FROM Booking b WHERE b.user = :user AND b.status = 'ACTIVE' AND b.endDate < :today")
     List<Booking> findPastBookings(@Param("user") User user, @Param("today") LocalDate today);
 
-    @Query("SELECT COUNT(b) FROM Booking b WHERE b.user.id = :userId")
-    int countByUserId(@Param("userId") Long userId);
+    int countByUserId(Long userId);
 
-    @Query("SELECT SUM(i.pricePerDay) FROM Booking b JOIN b.item i WHERE b.user.id = :userId AND b.status = 'APPROVED'")
-    Double getTotalSpentByUser(@Param("userId") Long userId);
+    @Query("SELECT COALESCE(SUM(b.amount), 0) FROM Booking b WHERE b.user.id = :userId")
+    double sumAmountSpentByUserId(@Param("userId") Long userId);
 
-    @Query("SELECT SUM(i.pricePerDay) FROM Booking b JOIN b.item i WHERE i.user.id = :ownerId AND b.status = 'APPROVED'")
-    Double getTotalEarningsByOwner(@Param("ownerId") Long ownerId);
+    @Query("SELECT COALESCE(SUM(b.amount), 0) FROM Booking b WHERE b.item.user.id = :ownerId")
+    double sumAmountEarnedByOwnerId(@Param("ownerId") Long ownerId);
+
+
 }

@@ -12,7 +12,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.SpringProject.kharidoMat.enums.Role;
-import com.SpringProject.kharidoMat.model.DashboardStats;
 import com.SpringProject.kharidoMat.model.Item;
 import com.SpringProject.kharidoMat.model.User;
 import com.SpringProject.kharidoMat.repository.BookingRepository;
@@ -178,24 +177,6 @@ public class UserServiceImpl implements UserService {
 		return user.getWishlist();
 	}
 
-	@Override
-	public DashboardStats getUserStats(Long userId, String role) {
-		logger.info("Generating dashboard stats for userId: {} with role: {}", userId, role);
-		DashboardStats dto = new DashboardStats();
-
-		if (role.equalsIgnoreCase("STUDENT")) {
-			dto.setTotalBookings(bookingRepository.countByUserId(userId));
-			Double spent = bookingRepository.getTotalSpentByUser(userId);
-			dto.setTotalAmount(spent == null ? 0 : spent);
-		} else if (role.equalsIgnoreCase("OWNER")) {
-			dto.setTotalListings(itemRepository.countByOwnerId(userId));
-			Double earnings = bookingRepository.getTotalEarningsByOwner(userId);
-			dto.setTotalAmount(earnings == null ? 0 : earnings);
-		}
-
-		logger.info("Stats for userId {}: {}", userId, dto);
-		return dto;
-	}
 
 	@Override
 	public boolean verifyEmail(String email, String otp) {
