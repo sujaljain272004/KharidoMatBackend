@@ -2,6 +2,7 @@ package com.SpringProject.kharidoMat.serviceImpl;
 
 import java.time.LocalDate;
 import com.SpringProject.kharidoMat.dto.BookingDTO; // Import DTOs
+import com.SpringProject.kharidoMat.dto.BookingDateDto;
 import com.SpringProject.kharidoMat.dto.ItemDTO;
 import com.SpringProject.kharidoMat.dto.UserDTO;
 import java.time.temporal.ChronoUnit;
@@ -306,6 +307,16 @@ public class BookingServiceImpl implements BookingService {
                 
                 return dto;
             }).collect(Collectors.toList());
+    }
+    
+    public List<BookingDateDto> getBookingDatesByItemId(Long itemId) {
+        // 1. Fetch all booking entities for the item from the database.
+        List<Booking> bookings = bookingRepository.findAllByItemId(itemId);
+
+        // 2. Map the list of Booking entities to a list of BookingDateDto objects.
+        return bookings.stream()
+                .map(booking -> new BookingDateDto(booking.getStartDate(), booking.getEndDate()))
+                .collect(Collectors.toList());
     }
 
 }

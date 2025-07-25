@@ -92,7 +92,8 @@ public class SecurityConfig {
                         "/api/items/my",
                         "/api/items/upload-image/**",
                         "/api/bookings/**",
-                        "/api/chats/**"
+                        "/api/chats/**",
+                        "/{itemId}/bookings"
                     ).authenticated()
 
                     // --- CATCH-ALL: Any other request must be authenticated ---
