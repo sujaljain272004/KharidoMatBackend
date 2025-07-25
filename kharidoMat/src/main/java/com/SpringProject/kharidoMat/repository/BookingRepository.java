@@ -15,6 +15,8 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     List<Booking> findByUser(User user);
     
     List<Booking> findByUserId(Long userId);
+    
+    List<Booking> findAllByUserEmail(String email);
 
     @Query("SELECT b FROM Booking b WHERE b.item.user = :owner")
     List<Booking> findBookingsByItemOwner(@Param("owner") User owner);
@@ -47,7 +49,6 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     @Query("SELECT COALESCE(SUM(b.amount), 0) FROM Booking b WHERE b.item.user.id = :ownerId")
     double sumAmountEarnedByOwnerId(@Param("ownerId") Long ownerId);
-    
-    List<Booking> findAllByItemId(Long itemId);
 
+    List<Booking> findAllByItemId(Long itemId);
 }

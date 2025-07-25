@@ -54,24 +54,20 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public void saveBasicUserInfo(User user) {
-	    logger.info("Starting registration for: {}", user.getEmail());
+		logger.info("Starting registration for: {}", user.getEmail());
 
-	    if (userRepository.findByEmail(user.getEmail()) != null) {
-	        throw new IllegalArgumentException("User already exists with email: " + user.getEmail());
-	    }
+		if (userRepository.findByEmail(user.getEmail()) != null) {
+			throw new IllegalArgumentException("User already exists with email: " + user.getEmail());
+		}
 
-	    // Save basic user info first
-	    user.setVerified(false); // explicitly set
-	    userRepository.save(user); // 💾 this was missing
+		user.setVerified(false);
+		userRepository.save(user);
+		otpService.generateAndSendOTP(user.getEmail());
 
-	    // Then generate and send OTP
-	    otpService.generateAndSendOTP(user.getEmail());
-
-	    logger.info("User saved and OTP sent to email: {}", user.getEmail());
+		logger.info("User saved and OTP sent to email: {}", user.getEmail());
 	}
 
-
-	
+	@Override
 	public void completeRegistration(String email, String password, String studentId) {
 		User user = userRepository.findByEmail(email);
 		if (user == null) {
@@ -83,9 +79,8 @@ public class UserServiceImpl implements UserService {
 		user.setVerified(true);
 		user.setRole(Role.STUDENT);
 
-		userRepository.save(user); // ✅ Update existing user instead of creating new
+		userRepository.save(user);
 	}
-
 
 	@Override
 	public User registerUser(User user) {
@@ -153,8 +148,7 @@ public class UserServiceImpl implements UserService {
 		}
 
 		if (user.getWishlist() != null) {
-			Item itemToRemove = user.getWishlist().stream().filter(i -> i.getId().equals(itemId)).findFirst()
-					.orElse(null);
+			Item itemToRemove = user.getWishlist().stream().filter(i -> i.getId().equals(itemId)).findFirst().orElse(null);
 
 			if (itemToRemove != null) {
 				user.getWishlist().remove(itemToRemove);
@@ -177,26 +171,24 @@ public class UserServiceImpl implements UserService {
 		return user.getWishlist();
 	}
 
-
 	@Override
 	public boolean verifyEmail(String email, String otp) {
-	    logger.info("Verifying OTP for email: {}", email);
+		logger.info("Verifying OTP for email: {}", email);
 
-	    if (!otpService.verifyOTP(email, otp)) {
-	        logger.warn("OTP verification failed for email: {}", email);
-	        return false;
-	    }
+		if (!otpService.verifyOTP(email, otp)) {
+			logger.warn("OTP verification failed for email: {}", email);
+			return false;
+		}
 
-	    User user = userRepository.findByEmail(email);
-	    if (user == null) {
-	        logger.error("No user found with email: {}", email);
-	        return false; // or throw an exception if that's your design
-	    }
+		User user = userRepository.findByEmail(email);
+		if (user == null) {
+			logger.error("No user found with email: {}", email);
+			return false;
+		}
 
-	    user.setVerified(true);
-	    userRepository.save(user);
-	    logger.info("Email verified successfully for user: {}", email);
-	    return true;
+		user.setVerified(true);
+		userRepository.save(user);
+		logger.info("Email verified successfully for user: {}", email);
+		return true;
 	}
-
 }

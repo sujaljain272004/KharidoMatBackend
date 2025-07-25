@@ -21,6 +21,7 @@ import com.SpringProject.kharidoMat.model.Booking;
 import com.SpringProject.kharidoMat.repository.BookingRepository;
 import com.SpringProject.kharidoMat.service.BookingService;
 import com.SpringProject.kharidoMat.service.EmailService;
+import com.razorpay.RazorpayException;
 
 @RestController
 @RequestMapping("/api/bookings")
@@ -228,6 +229,45 @@ public class BookingController {
     public ResponseEntity<List<BookingDateDto>> getItemBookings(@PathVariable Long itemId) {
         List<BookingDateDto> bookingDates = bookingService.getBookingDatesByItemId(itemId);
         return ResponseEntity.ok(bookingDates);
+    }
+    
+ // In your BookingController.java
+
+    @PostMapping("/{bookingId}/create-extension-order")
+    public ResponseEntity<Map<String, Object>> createExtensionOrder(
+            @PathVariable Long bookingId,
+            @RequestBody Map<String, String> payload) throws RazorpayException {
+        
+        String newEndDateStr = payload.get("newEndDate");
+        LocalDate newEndDate = LocalDate.parse(newEndDateStr);
+
+        // This service method will calculate the cost and create a Razorpay order
+        Map<String, Object> razorpayOrderDetails = bookingService.createExtensionPaymentOrder(bookingId, newEndDate);
+        
+        return ResponseEntity.ok(razorpayOrderDetails);
+    }
+    
+ // In your BookingController.java
+
+    @PostMapping("/{bookingId}/verify-and-extend")
+    public ResponseEntity<String> verifyAndExtendBooking(
+            @PathVariable Long bookingId,
+            @RequestBody Map<String, String> payload) {
+
+        String newEndDateStr = payload.get("newEndDate");
+        String razorpayPaymentId = payload.get("razorpay_payment_id");
+        String razorpayOrderId = payload.get("razorpay_order_id");
+        String razorpaySignature = payload.get("razorpay_signature");
+        
+        bookingService.verifyExtensionPaymentAndUpdateBooking(
+            bookingId, 
+            LocalDate.parse(newEndDateStr),
+            razorpayPaymentId,
+            razorpayOrderId,
+            razorpaySignature
+        );
+
+        return ResponseEntity.ok("Booking extended successfully!");
     }
 
 }

@@ -7,6 +7,7 @@ import java.util.Map;
 import com.SpringProject.kharidoMat.dto.BookingDTO;
 import com.SpringProject.kharidoMat.dto.BookingDateDto;
 import com.SpringProject.kharidoMat.model.Booking;
+import com.razorpay.RazorpayException;
 
 public interface BookingService {
 	Booking createBooking(Long itemId, String username, LocalDate startDate, LocalDate endDate);
@@ -30,5 +31,8 @@ public interface BookingService {
 	List<BookingDTO> getPendingReturnsForOwner(String ownerUsername);
 	
 	List<BookingDateDto> getBookingDatesByItemId(Long itemId) ;
+	
+	Map<String, Object> createExtensionPaymentOrder(Long bookingId, LocalDate newEndDate)throws RazorpayException;
+	void verifyExtensionPaymentAndUpdateBooking(Long bookingId, LocalDate newEndDate, String paymentId, String orderId, String signature);
 
 }

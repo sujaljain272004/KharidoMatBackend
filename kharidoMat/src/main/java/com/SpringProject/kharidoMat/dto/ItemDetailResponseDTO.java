@@ -20,6 +20,9 @@ public class ItemDetailResponseDTO {
 
 	private String imageName;
 
+	private Double averageRating;
+	private Long totalReviews;
+
 	public ItemDetailResponseDTO(Item item) {
 
 		this.id = item.getId();
@@ -29,7 +32,7 @@ public class ItemDetailResponseDTO {
 		this.category = item.getCategory();
 		this.available = item.isAvailable();
 		this.imageName = item.getImageName();
-		
+
 		if (item.getUser() != null) {
 			this.owner = new OwnerDTO(item.getUser());
 		}
@@ -99,5 +102,17 @@ public class ItemDetailResponseDTO {
 		this.imageName = imageName;
 	}
 	
-	
+	public Double getAverageRating() {
+        return averageRating;
+    }
+    public void setAverageRating(Double averageRating) {
+        this.averageRating = averageRating;
+    }
+    public Long getTotalReviews() {
+        return totalReviews;
+    }
+    public void setTotalReviews(Long totalReviews) {
+        this.totalReviews = totalReviews;
+    }
+
 }
