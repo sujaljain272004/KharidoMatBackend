@@ -42,9 +42,13 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     @Query("SELECT b FROM Booking b WHERE b.user = :user AND b.status = 'ACTIVE' AND b.endDate < :today")
     List<Booking> findPastBookings(@Param("user") User user, @Param("today") LocalDate today);
 
-    int countByUserId(@Param("userId") Long userId);
+    int countByUserId(Long userId);
 
+    @Query("SELECT COALESCE(SUM(b.amount), 0) FROM Booking b WHERE b.user.id = :userId")
+    double sumAmountSpentByUserId(@Param("userId") Long userId);
 
-    
+    @Query("SELECT COALESCE(SUM(b.amount), 0) FROM Booking b WHERE b.item.user.id = :ownerId")
+    double sumAmountEarnedByOwnerId(@Param("ownerId") Long ownerId);
+
     List<Booking> findAllByItemId(Long itemId);
 }

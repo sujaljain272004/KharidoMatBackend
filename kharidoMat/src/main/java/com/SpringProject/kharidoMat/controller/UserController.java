@@ -55,23 +55,18 @@ public class UserController {
     @PostMapping("/verify")
     public ResponseEntity<String> verify(@RequestBody VerificationRequest req) {
         boolean verified = userService.verifyEmail(req.getEmail(), req.getOtp());
-
         if (verified) {
             return ResponseEntity.ok("OTP verified. Proceed to set password.");
         } else {
             return ResponseEntity.status(400).body("Invalid or expired OTP");
         }
-
     }
-    
+
     @PostMapping("/complete-registration")
     public ResponseEntity<String> complete(@RequestBody CompleteRegistrationRequest req) {
         userService.completeRegistration(req.getEmail(), req.getPassword(), req.getStudentId());
         return ResponseEntity.ok("Registration completed!");
     }
-
-
-
 
     @GetMapping("/")
     public List<User> getAllUsers() {
@@ -130,8 +125,6 @@ public class UserController {
         return ResponseEntity.ok(userService.getWishlist(email));
     }
 
-    
-
     @PostMapping("/forgot-password")
     public ResponseEntity<String> forgotPassword(@RequestBody Map<String, String> request) {
         String email = request.get("email");
@@ -169,8 +162,8 @@ public class UserController {
         log.info("Password reset successful for {}", request.getEmail());
         return ResponseEntity.ok("Password reset successful");
     }
-    
-    @PutMapping("/users/edit-profile")
+
+    @PutMapping("/edit-profile")
     public ResponseEntity<?> editProfile(@RequestBody EditProfileRequest request, Principal principal) {
         User user = userRepository.findByEmail(principal.getName());
         if (user == null) {
@@ -186,21 +179,16 @@ public class UserController {
 
         return ResponseEntity.ok("Profile updated successfully");
     }
-    
+
     @GetMapping("/profile")
     public ResponseEntity<UserDTO> getUserProfile(Authentication authentication) {
-        // Spring Security's Authentication object holds the user's email (principal)
         String email = authentication.getName();
-        
-        // Find the user in the database
         User user = userRepository.findByEmail(email);
         if (user == null) {
             throw new UsernameNotFoundException("User not found with email: " + email);
         }
-        
-        // Convert the User entity to a safe DTO and return it
+
         UserDTO userDTO = new UserDTO(user);
-        
         return ResponseEntity.ok(userDTO);
     }
 }
