@@ -1,5 +1,3 @@
-// =============== 4. ItemController.java (Full & Correct) ===============
-// This is the complete controller with all endpoints.
 
 package com.SpringProject.kharidoMat.controller;
 
