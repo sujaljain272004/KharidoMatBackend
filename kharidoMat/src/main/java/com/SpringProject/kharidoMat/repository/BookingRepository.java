@@ -48,4 +48,6 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     @Query("SELECT SUM(i.pricePerDay) FROM Booking b JOIN b.item i WHERE i.user.id = :ownerId AND b.status = 'APPROVED'")
     Double getTotalEarningsByOwner(@Param("ownerId") Long ownerId);
+    
+    List<Booking> findAllByItemId(Long itemId);
 }

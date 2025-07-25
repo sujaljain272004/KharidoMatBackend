@@ -15,6 +15,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import com.SpringProject.kharidoMat.dto.BookingDTO;
+import com.SpringProject.kharidoMat.dto.BookingDateDto;
 import com.SpringProject.kharidoMat.dto.BookingRequestDTO;
 import com.SpringProject.kharidoMat.model.Booking;
 import com.SpringProject.kharidoMat.repository.BookingRepository;
@@ -221,6 +222,12 @@ public class BookingController {
 
         // 3. Return the list of pending bookings to the frontend
         return ResponseEntity.ok(pendingReturns);
+    }
+    
+    @GetMapping("/{itemId}/bookings")
+    public ResponseEntity<List<BookingDateDto>> getItemBookings(@PathVariable Long itemId) {
+        List<BookingDateDto> bookingDates = bookingService.getBookingDatesByItemId(itemId);
+        return ResponseEntity.ok(bookingDates);
     }
 
 }
