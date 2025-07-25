@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.SpringProject.kharidoMat.dto.BookingDTO;
+import com.SpringProject.kharidoMat.dto.BookingDateDto;
 import com.SpringProject.kharidoMat.model.Booking;
 
 public interface BookingService {
@@ -27,5 +28,7 @@ public interface BookingService {
 	
 	// In BookingService.java interface
 	List<BookingDTO> getPendingReturnsForOwner(String ownerUsername);
+	
+	List<BookingDateDto> getBookingDatesByItemId(Long itemId) ;
 
 }
