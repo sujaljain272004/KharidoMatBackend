@@ -14,10 +14,13 @@ import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
 import com.SpringProject.kharidoMat.model.Booking;
+import com.SpringProject.kharidoMat.model.User;
 import com.lowagie.text.Document;
 import com.lowagie.text.Paragraph;
 import com.lowagie.text.pdf.PdfWriter;
 import java.io.ByteArrayOutputStream; // Use the standard Java class
+import java.time.YearMonth;
+
 import jakarta.mail.internet.MimeMessage;
 
 import com.lowagie.text.Font;
@@ -179,6 +182,29 @@ public class EmailService {
 
         } catch (Exception e) {
             logger.error("Failed to send owner notification for booking ID {}:", booking.getId(), e);
+        }
+    }
+    
+ // In EmailService.java
+
+    @Async
+    public void sendMonthlyReportEmail(User owner, YearMonth month, byte[] excelFile) {
+        try {
+            MimeMessage mimeMessage = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true);
+
+            helper.setTo(owner.getEmail());
+            helper.setSubject("Your Campus Rental Monthly Report for " + month.toString());
+            helper.setText("Hello " + owner.getFullName() + ",\n\nPlease find your monthly performance report attached.\n\nThank you,\nThe Campus Rental Team");
+
+            String fileName = "Report-" + month.toString() + ".xlsx";
+            helper.addAttachment(fileName, new ByteArrayResource(excelFile));
+
+            mailSender.send(mimeMessage);
+            logger.info("Successfully sent monthly report to {}", owner.getEmail());
+
+        } catch (Exception e) {
+            logger.error("Failed to send monthly report to {}:", owner.getEmail(), e);
         }
     }
 }
