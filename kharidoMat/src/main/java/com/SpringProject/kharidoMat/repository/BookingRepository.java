@@ -51,4 +51,11 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     double sumAmountEarnedByOwnerId(@Param("ownerId") Long ownerId);
 
     List<Booking> findAllByItemId(Long itemId);
+    
+    @Query("SELECT b FROM Booking b WHERE b.item.id = :itemId AND b.status = 'COMPLETED' AND FUNCTION('YEAR', b.endDate) = :year AND FUNCTION('MONTH', b.endDate) = :monthValue")
+    List<Booking> findCompletedBookingsForItemInMonth(
+        @Param("itemId") Long itemId, 
+        @Param("year") int year, 
+        @Param("monthValue") int monthValue
+    );
 }

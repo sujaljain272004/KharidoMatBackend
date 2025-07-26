@@ -2,6 +2,7 @@ package com.SpringProject.kharidoMat.controller;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.YearMonth;
 import java.util.List;
 import java.util.Map;
 
@@ -19,9 +20,12 @@ import com.SpringProject.kharidoMat.dto.BookingDateDto;
 import com.SpringProject.kharidoMat.dto.BookingRequestDTO;
 import com.SpringProject.kharidoMat.enums.BookingStatus;
 import com.SpringProject.kharidoMat.model.Booking;
+import com.SpringProject.kharidoMat.model.User;
 import com.SpringProject.kharidoMat.repository.BookingRepository;
+import com.SpringProject.kharidoMat.repository.UserRepository;
 import com.SpringProject.kharidoMat.service.BookingService;
 import com.SpringProject.kharidoMat.service.EmailService;
+import com.SpringProject.kharidoMat.service.ReportService;
 import com.razorpay.RazorpayException;
 
 @RestController
@@ -38,6 +42,14 @@ public class BookingController {
 
     @Autowired
     private EmailService emailService;
+    
+    @Autowired
+    private ReportService reportService;
+
+
+    @Autowired
+    private UserRepository userRepository;
+
 
     @PostMapping("/item/{itemId}")
     public ResponseEntity<?> bookItem(@PathVariable Long itemId,
@@ -282,6 +294,31 @@ public class BookingController {
         );
 
         return ResponseEntity.ok("Booking extended successfully!");
+    }
+    
+    
+    @GetMapping("/generate-test-report")
+    public ResponseEntity<String> generateTestReport(@RequestParam Long userId) {
+        try {
+            User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found with ID: " + userId));
+            
+            YearMonth currentMonth = YearMonth.now(); 
+            
+            byte[] report = reportService.generateMonthlyReportForOwner(user, currentMonth);
+            
+            if (report.length > 50) { 
+                emailService.sendMonthlyReportEmail(user, currentMonth, report);
+                return ResponseEntity.ok("SUCCESS: Test report for user " + userId + " has been sent.");
+            } else {
+                return ResponseEntity.ok("INFO: No completed booking data found for this user in the current month. Report was not sent.");
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                                 .body("ERROR: Failed to generate report: " + e.getMessage());
+        }
     }
 
 }
