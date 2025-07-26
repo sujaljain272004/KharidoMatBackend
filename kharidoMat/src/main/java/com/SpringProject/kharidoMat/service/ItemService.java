@@ -74,7 +74,7 @@ public class ItemService {
     public List<Item> getItemsByUserEmail(String email) {
         logger.info("Getting items for user email: {}", email);
         User user = userRepository.findByEmail(email);
-        return itemRepository.findByUser(user);
+        return itemRepository.findItemsWithBookingsByUserEmail(email);
     }
     
     @Transactional
