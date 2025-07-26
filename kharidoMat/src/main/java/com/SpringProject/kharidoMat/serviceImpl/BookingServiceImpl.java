@@ -57,6 +57,7 @@ public class BookingServiceImpl implements BookingService {
 		// 1. Find the User and Item from the database
 		// CORRECTED: Handle a nullable User object instead of an Optional
 		User user = userRepository.findByEmail(username);
+
 		if (user == null) {
 			throw new IllegalArgumentException("User not found with email: " + username);
 		}
@@ -70,11 +71,13 @@ public class BookingServiceImpl implements BookingService {
 			throw new IllegalArgumentException("You cannot book your own item.");
 		}
 
+
 		List<Booking> conflicts = bookingRepository.findConflictingBookings(itemId, startDate, endDate);
 		if (!conflicts.isEmpty()) {
 			logger.warn("Booking conflict for item {} between {} and {}", itemId, startDate, endDate);
 			throw new IllegalArgumentException("Item is already booked for the selected dates.");
 		}
+		
 
 		// 3. Create and populate the new Booking object
 		Booking newBooking = new Booking();
@@ -88,11 +91,20 @@ public class BookingServiceImpl implements BookingService {
 		long days = ChronoUnit.DAYS.between(startDate, endDate) + 1; // Add 1 to include the start day
 		double pricePerDay = item.getPricePerDay();
 		newBooking.setAmount(days * pricePerDay);
+		
+	    Booking savedBooking = bookingRepository.save(newBooking);
 
 		// 5. Save the new booking and return it
 		logger.info("Booking created successfully: itemId={}, user={}, amount={}", itemId, username,
 				newBooking.getAmount());
-		return bookingRepository.save(newBooking);
+
+		emailService.sendBookingConfirmationEmail(savedBooking);
+		emailService.sendOwnerNotificationEmail(savedBooking);
+
+	    logger.info("Booking created and confirmation email sent successfully.");
+	    
+	    // 7. Finally, return the saved booking
+	    return savedBooking;
 	}
 
 	// In BookingService.java

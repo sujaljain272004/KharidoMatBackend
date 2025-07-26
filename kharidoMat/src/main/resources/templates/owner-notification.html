@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>New Booking Notification</title>
+</head>
+<body>
+    <h2>You Have a New Booking!</h2>
+    
+    <p>Hello <strong th:text="${booking.item.user.fullName}">Owner Name</strong>,</p>
+    
+    <p>Great news! Your item, '<strong th:text="${booking.item.title}">Item Name</strong>', has been booked. Please find the details below.</p>
+    
+    <h3>Booking Details:</h3>
+    <ul>
+        <li><strong>Booked By:</strong> <span th:text="${booking.user.fullName}">Renter Name</span></li>
+        <li><strong>Rental Period:</strong> <span th:text="${booking.startDate}">Start Date</span> to <span th:text="${booking.endDate}">End Date</span></li>
+        <li><strong>Your Earning:</strong> Rs. <span th:text="${#numbers.formatDecimal(booking.Amount, 1, 'COMMA', 2, 'POINT')}">0.00</span></li>
+    </ul>
+    
+    <p>You can view and manage this booking from your dashboard.</p>
+    <p>Thank you,</p>
+    <p>The Campus Rental (kharidomat) Team</p>
+</body>
+</html>
