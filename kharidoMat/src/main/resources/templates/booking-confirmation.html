@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Booking Confirmation</title>
+</head>
+<body>
+    <h2>Booking Confirmed!</h2>
+    <p>Hello <strong th:text="${booking.user.fullName}">User</strong>,</p>
+    <p>Thank you for your booking. Your invoice is attached to this email.</p>
+    
+    <h3>Booking Summary:</h3>
+    <ul>
+        <li><strong>Item:</strong> <span th:text="${booking.item.title}">Item Name</span></li>
+        <li><strong>Start Date:</strong> <span th:text="${booking.startDate}">Start Date</span></li>
+        <li><strong>End Date:</strong> <span th:text="${booking.endDate}">End Date</span></li>
+        <li><strong>Total Price:</strong> Rs. <span th:text="${booking.Amount}">0.00</span></li>
+    </ul>
+    
+    <p>We hope you enjoy your rental!</p>
+</body>
+</html>
