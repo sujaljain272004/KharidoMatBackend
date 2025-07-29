@@ -1,7 +1,5 @@
 package com.SpringProject.kharidoMat.model;
 
-import java.util.List;
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import jakarta.persistence.*;
@@ -129,20 +127,4 @@ public class Item {
     @JoinColumn(name = "user_id")
     @JsonIgnoreProperties("items")
     private User user;
-    
-    @OneToMany(mappedBy = "item", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Booking> bookings;
-
-
-
-	public List<Booking> getBookings() {
-		return bookings;
-	}
-
-
-
-	public void setBookings(List<Booking> bookings) {
-		this.bookings = bookings;
-	}
-
 }

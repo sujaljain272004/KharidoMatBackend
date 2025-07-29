@@ -29,9 +29,6 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
 	 int countByOwnerId(@Param("ownerId") Long ownerId);
 	 
 	 List<Item> findByUser(User user);
-	 @Query("SELECT DISTINCT i FROM Item i LEFT JOIN FETCH i.bookings WHERE i.user.email = :email")
-	 List<Item> findItemsWithBookingsByUserEmail(@Param("email") String email);
-
 
 	 
 }

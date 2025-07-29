@@ -1,7 +1,5 @@
-
 package com.SpringProject.kharidoMat.controller;
 
-import com.SpringProject.kharidoMat.dto.BookingDTO;
 import com.SpringProject.kharidoMat.dto.ItemDetailResponseDTO;
 import com.SpringProject.kharidoMat.model.Item;
 import com.SpringProject.kharidoMat.service.ItemService;
@@ -92,34 +90,12 @@ public class ItemController {
     }
 
     @GetMapping("/my")
-    public ResponseEntity<List<ItemDetailResponseDTO>> getMyItems(@RequestHeader("Authorization") String authHeader) {
+    public ResponseEntity<List<Item>> getMyItems(@RequestHeader("Authorization") String authHeader) {
         String token = authHeader.substring(7);
         String email = jwtUtil.extractEmail(token);
-
-        // Step 1: Get all items listed by the user
         List<Item> items = itemService.getItemsByUserEmail(email);
-
-        // Step 2: Map each Item to ItemDetailResponseDTO and include booking info
-        List<ItemDetailResponseDTO> itemDTOs = items.stream().map(item -> {
-            ItemDetailResponseDTO dto = new ItemDetailResponseDTO(item);
-
-            // Step 3: For earnings breakdown, we only need startDate and endDate of bookings
-            List<BookingDTO> bookingDTOs = item.getBookings() != null ? 
-                item.getBookings().stream().map(b -> {
-                    BookingDTO bDto = new BookingDTO();
-                    bDto.setStartDate(b.getStartDate());
-                    bDto.setEndDate(b.getEndDate());
-                    return bDto;
-                }).toList() : List.of();
-
-            dto.setBookings(bookingDTOs);
-
-            return dto;
-        }).toList();
-
-        return ResponseEntity.ok(itemDTOs);
+        return ResponseEntity.ok(items);
     }
-
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getItemById(@PathVariable Long id) {
