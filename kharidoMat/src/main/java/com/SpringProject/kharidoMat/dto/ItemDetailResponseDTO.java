@@ -1,7 +1,5 @@
 package com.SpringProject.kharidoMat.dto;
 
-import java.util.List;
-
 import com.SpringProject.kharidoMat.model.Item;
 
 public class ItemDetailResponseDTO {
@@ -24,16 +22,6 @@ public class ItemDetailResponseDTO {
 
 	private Double averageRating;
 	private Long totalReviews;
-	private List<BookingDTO> bookings;
-
-	public List<BookingDTO> getBookings() {
-	    return bookings;
-	}
-
-	public void setBookings(List<BookingDTO> bookings) {
-	    this.bookings = bookings;
-	}
-
 
 	public ItemDetailResponseDTO(Item item) {
 

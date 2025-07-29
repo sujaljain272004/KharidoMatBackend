@@ -60,10 +60,31 @@ public class SecurityConfig {
                         "/api/items/all",
                         "/api/items/search",
                         "/api/items/category/**",
+                        "/api/users/verify",
+                        "/api/users/complete-registration",
                         "/api/items/image/{fileName}",
-                        "/swagger-ui/**", "/v3/api-docs/**"
+                        "/swagger-ui/**", "/v3/api-docs/**",
+                        "/api/bookings/return/verify-otp/**",
+                        "/api/users/forgot-password"
                         // Add other non-protected endpoints here
                     ).permitAll()
+                    
+                    // Protected endpoints
+                    .requestMatchers(
+                        "/api/dashboard/stats/**",
+                        "/api/users/wishlist/**",
+                        "/api/users/edit-profile",
+                        "/api/items/post",
+                        "/api/items/my",
+                        "/api/items/upload-image/**",
+                        "/api/bookings/**",
+                        "/api/chats/**",
+                        "/api/reviews/can-review/{itemId}",
+                        "/api/reviews/{itemId}",
+                        "/api/bookings/{bookingId}/create-extension-order/**",
+                        "/api/bookings/{bookingId}/verify-and-extend/**",
+                        "/{itemId}/bookings"
+                    ).authenticated()
 
                     // --- FIX: Be specific that only GET requests for an item ID are public ---
                     .requestMatchers(HttpMethod.GET, "/api/items/{id}").permitAll()

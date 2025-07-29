@@ -180,27 +180,31 @@ public class BookingController {
     public ResponseEntity<String> verifyOtp(@PathVariable Long bookingId,
                                             @RequestParam String otp) {
         logger.info("Verifying OTP for booking ID {}", bookingId);
-        Booking booking = bookingRepository.findById(bookingId).orElseThrow();
 
-        if (otp.equals(booking.getOtpCode()) &&
+        Booking booking = bookingRepository.findById(bookingId).orElseThrow(RuntimeException::new);
+
+        logger.info("Expected OTP: {}", booking.getOtpCode());
+        logger.info("Received OTP: {}", otp);
+
+        if (booking.getOtpCode() != null &&
+            otp.equals(booking.getOtpCode()) &&
+            booking.getOtpExpiry() != null &&
             LocalDateTime.now().isBefore(booking.getOtpExpiry())) {
-            
-            // --- CORRECTED LOGIC ---
-            // Instead of completing, we set it to 'pending' for the owner.
-            booking.setReturnStatus("pending_verification"); 
-            booking.setReturned(false); // It's not officially returned yet.
+
+            booking.setReturnStatus("pending_verification");
+            booking.setReturned(false);
             booking.setOtpCode(null);
             booking.setOtpExpiry(null);
-            
+
             bookingRepository.save(booking);
 
-            logger.info("OTP verified for booking ID {}. Return is now pending owner verification.", bookingId);
             return ResponseEntity.ok("OTP verified. Return is now pending owner verification.");
         }
 
         logger.warn("Invalid or expired OTP for booking ID {}", bookingId);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid or expired OTP.");
     }
+
     
     @GetMapping("/user/{userId}")
     public ResponseEntity<List<Booking>> getBookingsByUserId(@PathVariable Long userId) {
