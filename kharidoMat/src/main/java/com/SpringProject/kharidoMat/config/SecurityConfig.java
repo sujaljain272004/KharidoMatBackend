@@ -1,6 +1,6 @@
 // =============== 1. SecurityConfig.java (Final Corrected Version) ===============
 // This file contains the fix for the routing conflict.
-
+	
 package com.SpringProject.kharidoMat.config;
 
 import org.slf4j.Logger;

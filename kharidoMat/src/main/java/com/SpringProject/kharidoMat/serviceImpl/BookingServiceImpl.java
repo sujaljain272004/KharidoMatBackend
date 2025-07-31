@@ -3,6 +3,7 @@ package com.SpringProject.kharidoMat.serviceImpl;
 import java.time.LocalDate;
 import com.SpringProject.kharidoMat.dto.BookingDTO; // Import DTOs
 import com.SpringProject.kharidoMat.dto.BookingDateDto;
+import com.SpringProject.kharidoMat.dto.BookingRequestDTO;
 import com.SpringProject.kharidoMat.dto.ItemDTO;
 import com.SpringProject.kharidoMat.dto.UserDTO;
 import java.time.temporal.ChronoUnit;
@@ -49,65 +50,61 @@ public class BookingServiceImpl implements BookingService {
 	@Autowired
 	private EmailService emailService;
 
+
 	@Override
-	public Booking createBooking(Long itemId, String username, LocalDate startDate, LocalDate endDate) {
-		logger.info("Service: Creating booking for item {} by user {} from {} to {}", itemId, username, startDate,
-				endDate);
+	public Booking createBooking(BookingRequestDTO bookingRequest, String username) {
+	    logger.info("Service: Creating booking for item {} by user {}", bookingRequest.getItemId(), username);
 
-		// 1. Find the User and Item from the database
-		// CORRECTED: Handle a nullable User object instead of an Optional
-		User user = userRepository.findByEmail(username);
+	    // 1. Find the User and Item from the database
+	    User user = userRepository.findByEmail(username);
+	    if (user == null) {
+	        throw new IllegalArgumentException("User not found with email: " + username);
+	    }
 
-		if (user == null) {
-			throw new IllegalArgumentException("User not found with email: " + username);
-		}
+	    Item item = itemRepository.findById(bookingRequest.getItemId())
+	            .orElseThrow(() -> new IllegalArgumentException("Item not found with ID: " + bookingRequest.getItemId()));
 
-		Item item = itemRepository.findById(itemId)
-				.orElseThrow(() -> new IllegalArgumentException("Item not found with ID: " + itemId));
+	    // 2. Perform validation checks
+	    if (item.getUser().getEmail().equals(username)) {
+	        logger.warn("User {} attempted to book their own item {}", username, bookingRequest.getItemId());
+	        throw new IllegalArgumentException("You cannot book your own item.");
+	    }
 
-		// 2. Perform validation checks
-		if (item.getUser().getEmail().equals(username)) {
-			logger.warn("User {} attempted to book their own item {}", username, itemId);
-			throw new IllegalArgumentException("You cannot book your own item.");
-		}
+	    List<Booking> conflicts = bookingRepository.findConflictingBookings(
+	        bookingRequest.getItemId(), 
+	        bookingRequest.getStartDate(), 
+	        bookingRequest.getEndDate()
+	    );
+	    if (!conflicts.isEmpty()) {
+	        logger.warn("Booking conflict for item {}", bookingRequest.getItemId());
+	        throw new IllegalArgumentException("Item is already booked for the selected dates.");
+	    }
 
+	    // 3. Create and populate the new Booking object from the DTO
+	    Booking newBooking = new Booking();
+	    newBooking.setUser(user);
+	    newBooking.setItem(item);
+	    newBooking.setStartDate(bookingRequest.getStartDate());
+	    newBooking.setEndDate(bookingRequest.getEndDate());
+	    newBooking.setAmount(bookingRequest.getTotalPrice()); // Use the price from the request
+	    newBooking.setStatus(BookingStatus.ACTIVE);
 
-		List<Booking> conflicts = bookingRepository.findConflictingBookings(itemId, startDate, endDate);
-		if (!conflicts.isEmpty()) {
-			logger.warn("Booking conflict for item {} between {} and {}", itemId, startDate, endDate);
-			throw new IllegalArgumentException("Item is already booked for the selected dates.");
-		}
-		
+	    // --- THIS IS THE KEY PART ---
+	    // 4. Set the Razorpay transaction details
+	    newBooking.setRazorpayPaymentId(bookingRequest.getRazorpayPaymentId());
+	    newBooking.setRazorpayOrderId(bookingRequest.getRazorpayOrderId());
+	    // -------------------------
 
-		// 3. Create and populate the new Booking object
-		Booking newBooking = new Booking();
-		newBooking.setUser(user);
-		newBooking.setItem(item);
-		newBooking.setStartDate(startDate);
-		newBooking.setEndDate(endDate);
-		newBooking.setStatus(BookingStatus.ACTIVE); // Or PENDING, CONFIRMED, etc.
-
-		// 4. Calculate the total price
-		long days = ChronoUnit.DAYS.between(startDate, endDate) + 1; // Add 1 to include the start day
-		double pricePerDay = item.getPricePerDay();
-		newBooking.setAmount(days * pricePerDay);
-		
+	    // 5. Save the booking, send emails, and return
 	    Booking savedBooking = bookingRepository.save(newBooking);
 
-		// 5. Save the new booking and return it
-		logger.info("Booking created successfully: itemId={}, user={}, amount={}", itemId, username,
-				newBooking.getAmount());
+	    emailService.sendBookingConfirmationEmail(savedBooking);
+	    emailService.sendOwnerNotificationEmail(savedBooking);
 
-		emailService.sendBookingConfirmationEmail(savedBooking);
-		emailService.sendOwnerNotificationEmail(savedBooking);
-
-	    logger.info("Booking created and confirmation email sent successfully.");
-	    
-	    // 7. Finally, return the saved booking
+	    logger.info("Booking created and confirmation email sent successfully for booking ID: {}", savedBooking.getId());
 	    return savedBooking;
 	}
 
-	// In BookingService.java
 
 	@Override
 	public List<BookingDTO> getBookingByUser(String username) {

@@ -132,6 +132,9 @@ public class EmailService {
         addInvoiceRow(table, "Rental Period:", booking.getStartDate().toString() + " to " + booking.getEndDate().toString(), boldFont, normalFont);
         addInvoiceRow(table, "Status:", booking.getStatus().toString(), boldFont, normalFont);
         addInvoiceRow(table, "Total Amount:", "Rs. " + String.format("%.2f", booking.getAmount()), boldFont, boldFont); // Make amount bold
+        
+        addInvoiceRow(table, "Payment ID:", booking.getRazorpayPaymentId(), boldFont, normalFont);
+        addInvoiceRow(table, "Order ID:", booking.getRazorpayOrderId(), boldFont, normalFont);
 
         document.add(table);
 

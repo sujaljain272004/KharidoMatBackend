@@ -24,6 +24,9 @@ public class Booking {
 
     private String otpCode;
     private LocalDateTime otpExpiry;
+    
+    private String razorpayPaymentId;
+    private String razorpayOrderId;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -124,4 +127,22 @@ public class Booking {
     public void setItem(Item item) {
         this.item = item;
     }
+
+	public String getRazorpayPaymentId() {
+		return razorpayPaymentId;
+	}
+
+	public void setRazorpayPaymentId(String razorpayPaymentId) {
+		this.razorpayPaymentId = razorpayPaymentId;
+	}
+
+	public String getRazorpayOrderId() {
+		return razorpayOrderId;
+	}
+
+	public void setRazorpayOrderId(String razorpayOrderId) {
+		this.razorpayOrderId = razorpayOrderId;
+	}
+    
+     
 }
