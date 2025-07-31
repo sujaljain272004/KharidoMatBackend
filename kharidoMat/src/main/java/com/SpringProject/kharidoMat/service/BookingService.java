@@ -6,12 +6,12 @@ import java.util.Map;
 
 import com.SpringProject.kharidoMat.dto.BookingDTO;
 import com.SpringProject.kharidoMat.dto.BookingDateDto;
+import com.SpringProject.kharidoMat.dto.BookingRequestDTO;
 import com.SpringProject.kharidoMat.model.Booking;
 import com.razorpay.RazorpayException;
 
 public interface BookingService {
-	Booking createBooking(Long itemId, String username, LocalDate startDate, LocalDate endDate);
-
+	Booking createBooking(BookingRequestDTO bookingRequest, String username);
 	// The new, correct return type
 	List<BookingDTO> getBookingByUser(String username);
 

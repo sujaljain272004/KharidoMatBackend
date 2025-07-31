@@ -7,6 +7,8 @@ public class BookingRequestDTO {
     private LocalDate startDate;
     private LocalDate endDate;
     private Double totalPrice;
+    private String razorpayPaymentId;
+    private String razorpayOrderId;
 
     // --- Getters and Setters ---
 
@@ -41,4 +43,22 @@ public class BookingRequestDTO {
     public void setTotalPrice(Double totalPrice) {
         this.totalPrice = totalPrice;
     }
+
+	public String getRazorpayPaymentId() {
+		return razorpayPaymentId;
+	}
+
+	public void setRazorpayPaymentId(String razorpayPaymentId) {
+		this.razorpayPaymentId = razorpayPaymentId;
+	}
+
+	public String getRazorpayOrderId() {
+		return razorpayOrderId;
+	}
+
+	public void setRazorpayOrderId(String razorpayOrderId) {
+		this.razorpayOrderId = razorpayOrderId;
+	}
+    
+    
 }

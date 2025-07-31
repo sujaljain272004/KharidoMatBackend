@@ -51,31 +51,6 @@ public class BookingController {
     private UserRepository userRepository;
 
 
-    @PostMapping("/item/{itemId}")
-    public ResponseEntity<?> bookItem(@PathVariable Long itemId,
-                                      @RequestBody Booking bookingRequest, // CORRECTED: Use the DTO
-                                      Authentication authentication) {
-        
-        if (authentication == null || !authentication.isAuthenticated()) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User must be logged in to create a booking.");
-        }
-
-        String username = authentication.getName();
-        logger.info("Booking request by user '{}' for item ID {}", username, itemId);
-
-        try {
-            // Your service method will need to be adapted to this signature
-            Booking booking = bookingService.createBooking(itemId, username, bookingRequest.getStartDate(), bookingRequest.getEndDate());
-            return ResponseEntity.status(HttpStatus.CREATED).body(booking);
-        } catch (IllegalArgumentException e) {
-            logger.warn("Booking creation failed for user '{}': {}", username, e.getMessage());
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-        } catch (Exception e) {
-            logger.error("Unexpected error during booking creation for user '{}'", username, e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred while creating the booking.");
-        }
-    }
-
     @GetMapping("/my")
     public ResponseEntity<List<BookingDTO>> getMyBookings(Authentication authentication) {
         String username = authentication.getName();
@@ -216,6 +191,9 @@ public class BookingController {
     @PostMapping
     public ResponseEntity<?> createBooking(@RequestBody BookingRequestDTO bookingRequest, 
                                            Authentication authentication) {
+    	
+    	logger.info("Service received Razorpay Payment ID: {}", bookingRequest.getRazorpayPaymentId());
+        logger.info("Service received Razorpay Order ID: {}", bookingRequest.getRazorpayOrderId());
         if (authentication == null || !authentication.isAuthenticated()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User must be logged in.");
         }
@@ -224,12 +202,7 @@ public class BookingController {
         logger.info("Booking request by user '{}' for item ID {}", userEmail, bookingRequest.getItemId());
 
         try {
-            Booking booking = bookingService.createBooking(
-                bookingRequest.getItemId(),
-                userEmail,
-                bookingRequest.getStartDate(),
-                bookingRequest.getEndDate()
-            );
+        	Booking booking = bookingService.createBooking(bookingRequest, userEmail);
             return ResponseEntity.status(HttpStatus.CREATED).body(booking);
         } catch (IllegalArgumentException e) {
             logger.warn("Booking creation failed: {}", e.getMessage());
