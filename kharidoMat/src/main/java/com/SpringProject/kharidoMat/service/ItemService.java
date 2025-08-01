@@ -3,7 +3,11 @@
 
 package com.SpringProject.kharidoMat.service;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,12 +16,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.SpringProject.kharidoMat.dto.ItemDetailResponseDTO;
-import com.SpringProject.kharidoMat.dto.UserDTO;
-import com.SpringProject.kharidoMat.model.Booking; // Import Booking
+import com.SpringProject.kharidoMat.model.Booking;
+import com.SpringProject.kharidoMat.model.Category;
 import com.SpringProject.kharidoMat.model.Item;
 import com.SpringProject.kharidoMat.model.Review;
 import com.SpringProject.kharidoMat.model.User;
 import com.SpringProject.kharidoMat.repository.BookingRepository; // Import BookingRepository
+import com.SpringProject.kharidoMat.repository.CategoryRepository;
 import com.SpringProject.kharidoMat.repository.ItemRepository;
 import com.SpringProject.kharidoMat.repository.ReviewRepository;
 import com.SpringProject.kharidoMat.repository.UserRepository;
@@ -30,16 +35,38 @@ public class ItemService {
     @Autowired private ItemRepository itemRepository;
     @Autowired private UserRepository userRepository;
     @Autowired private ReviewRepository reviewRepository;
-    @Autowired private BookingRepository bookingRepository; // Inject BookingRepository
+    @Autowired private BookingRepository bookingRepository; 
+    @Autowired private CategoryRepository categoryRepository;
+
 
     public Item createItem(Item item, String email) {
         logger.info("Creating item for user: {}", email);
         User user = userRepository.findByEmail(email);
         item.setUser(user);
+
+        Set<Category> resolvedCategories = new HashSet<>();
+        if (item.getCategories() != null) {
+            for (Category inputCategory : item.getCategories()) {
+                String name = inputCategory.getName();
+                Category existing = null;
+
+                Optional<Category> optional = categoryRepository.findByNameIgnoreCase(name);
+                if (optional.isPresent()) {
+                    existing = optional.get();
+                } else {
+                    existing = new Category(name);
+                    categoryRepository.save(existing);
+                }
+                resolvedCategories.add(existing);
+            }
+        }
+
+        item.setCategories(resolvedCategories);
         Item savedItem = itemRepository.save(item);
         logger.info("Item created: {}", savedItem.getId());
         return savedItem;
     }
+
 
     public List<Item> getAllItems() {
         logger.info("Fetching all items");
@@ -48,7 +75,7 @@ public class ItemService {
 
     public List<Item> getItemsByCategory(String category) {
         logger.info("Fetching items by category: {}", category);
-        return itemRepository.findByCategoryIgnoreCase(category);
+        return itemRepository.findByCategoryNameIgnoreCase(category);
     }
 
     public Item getItemById(Long id) {

@@ -1,5 +1,9 @@
 package com.SpringProject.kharidoMat.dto;
 
+import java.util.HashSet;
+import java.util.Set;
+
+import com.SpringProject.kharidoMat.model.Category;
 import com.SpringProject.kharidoMat.model.Item;
 
 public class ItemDetailResponseDTO {
@@ -12,7 +16,8 @@ public class ItemDetailResponseDTO {
 
 	private double pricePerDay;
 
-	private String category;
+	private Set<String> categories;
+
 
 	private OwnerDTO owner;
 
@@ -29,7 +34,14 @@ public class ItemDetailResponseDTO {
 		this.title = item.getTitle();
 		this.description = item.getDescription();
 		this.pricePerDay = item.getPricePerDay();
-		this.category = item.getCategory();
+		Set<String> categoryNames = new HashSet<>();
+		if (item.getCategories() != null) {
+		    for (Category cat : item.getCategories()) {
+		        categoryNames.add(cat.getName());
+		    }
+		}
+		this.categories = categoryNames;
+
 		this.available = item.isAvailable();
 		this.imageName = item.getImageName();
 
@@ -70,13 +82,14 @@ public class ItemDetailResponseDTO {
 		this.pricePerDay = pricePerDay;
 	}
 
-	public String getCategory() {
-		return category;
+	public Set<String> getCategories() {
+	    return categories;
 	}
 
-	public void setCategory(String category) {
-		this.category = category;
+	public void setCategories(Set<String> categories) {
+	    this.categories = categories;
 	}
+
 
 	public OwnerDTO getOwner() {
 		return owner;

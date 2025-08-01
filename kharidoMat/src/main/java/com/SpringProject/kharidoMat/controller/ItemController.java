@@ -1,6 +1,8 @@
 package com.SpringProject.kharidoMat.controller;
 
 import com.SpringProject.kharidoMat.dto.ItemDetailResponseDTO;
+import com.SpringProject.kharidoMat.dto.ItemPostRequest;
+import com.SpringProject.kharidoMat.model.Category;
 import com.SpringProject.kharidoMat.model.Item;
 import com.SpringProject.kharidoMat.service.ItemService;
 import com.SpringProject.kharidoMat.util.FileUploadUtil;
@@ -17,8 +19,10 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/api/items")
@@ -33,12 +37,29 @@ public class ItemController {
     private JwtUtil jwtUtil;
 
     @PostMapping("/post")
-    public ResponseEntity<?> postItem(@RequestBody Item item, @RequestHeader("Authorization") String authHeader) {
+    public ResponseEntity<?> postItem(@RequestBody ItemPostRequest request, @RequestHeader("Authorization") String authHeader) {
         String token = authHeader.substring(7);
         String email = jwtUtil.extractEmail(token);
+
+        Item item = new Item();
+        item.setTitle(request.getTitle());
+        item.setDescription(request.getDescription());
+        item.setPricePerDay(request.getPricePerDay());
+
+        Set<Category> categories = new HashSet<>();
+        if (request.getCategories() != null) {
+            for (String name : request.getCategories()) {
+                Category cat = new Category();
+                cat.setName(name.trim());
+                categories.add(cat);
+            }
+        }
+
+        item.setCategories(categories);
         Item savedItem = itemService.createItem(item, email);
         return ResponseEntity.ok(savedItem);
     }
+
 
     @GetMapping("/all")
     public ResponseEntity<List<Item>> getAllItems() {

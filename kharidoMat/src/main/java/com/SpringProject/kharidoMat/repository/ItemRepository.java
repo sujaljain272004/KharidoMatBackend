@@ -11,11 +11,13 @@ import com.SpringProject.kharidoMat.model.User;
 
 public interface ItemRepository extends JpaRepository<Item, Long> {
 
-	List<Item> findByCategoryIgnoreCase(String category);
+	@Query("SELECT i FROM Item i JOIN i.categories c WHERE LOWER(c.name) = LOWER(:categoryName)")
+	List<Item> findByCategoryNameIgnoreCase(@Param("categoryName") String categoryName);
+
 	
 	 @Query("SELECT i FROM Item i WHERE " +
 	            "(:title IS NULL OR LOWER(i.title) LIKE LOWER(CONCAT('%', :title, '%'))) AND " +
-	            "(:category IS NULL OR LOWER(i.category) = LOWER(:category)) AND " +
+	            "(:category IS NULL OR EXISTS (SELECT c FROM i.categories c WHERE LOWER(c.name) = LOWER(:category))) AND "+
 	            "(:minPrice IS NULL OR i.pricePerDay >= :minPrice) AND " +
 	            "(:maxPrice IS NULL OR i.pricePerDay <= :maxPrice) AND " +
 	            "(:available IS NULL OR i.available = :available)")

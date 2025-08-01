@@ -7,10 +7,6 @@ public class ItemDTO {
     private String imageUrl;
     private double pricePerDay;
     
-    
-  
-    
-    
 	public Long getId() {
 		return id;
 	}
