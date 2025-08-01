@@ -1,5 +1,8 @@
 package com.SpringProject.kharidoMat.model;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import jakarta.persistence.*;
@@ -18,7 +21,15 @@ public class Item {
     
     private double pricePerDay;
 
-    private String category;
+    @ManyToMany(cascade = { CascadeType.MERGE, CascadeType.PERSIST })
+    @JoinTable(
+        name = "item_category",
+        joinColumns = @JoinColumn(name = "item_id"),
+        inverseJoinColumns = @JoinColumn(name = "category_id")
+    )
+    @JsonIgnoreProperties("items")
+    private Set<Category> categories = new HashSet<>();
+
 
     private boolean available = true;
     
@@ -73,19 +84,6 @@ public class Item {
 	}
 
 
-
-	public String getCategory() {
-		return category;
-	}
-
-
-
-	public void setCategory(String category) {
-		this.category = category;
-	}
-
-
-
 	public boolean isAvailable() {
 		return available;
 	}
@@ -127,4 +125,18 @@ public class Item {
     @JoinColumn(name = "user_id")
     @JsonIgnoreProperties("items")
     private User user;
+
+
+
+	public Set<Category> getCategories() {
+		return categories;
+	}
+
+
+
+	public void setCategories(Set<Category> categories) {
+		this.categories = categories;
+	}
+    
+    
 }
