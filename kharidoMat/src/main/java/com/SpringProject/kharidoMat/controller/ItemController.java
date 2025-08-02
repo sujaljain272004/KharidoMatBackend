@@ -2,6 +2,7 @@ package com.SpringProject.kharidoMat.controller;
 
 import com.SpringProject.kharidoMat.dto.ItemDetailResponseDTO;
 import com.SpringProject.kharidoMat.dto.ItemPostRequest;
+import com.SpringProject.kharidoMat.dto.ItemWithBookingsDTO;
 import com.SpringProject.kharidoMat.model.Category;
 import com.SpringProject.kharidoMat.model.Item;
 import com.SpringProject.kharidoMat.service.ItemService;
@@ -143,5 +144,13 @@ public class ItemController {
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
+    }
+    
+    @GetMapping("/my-with-bookings")
+    public ResponseEntity<List<ItemWithBookingsDTO>> getMyItemsWithBookings(@RequestHeader("Authorization") String authHeader) {
+        String token = authHeader.substring(7);
+        String email = jwtUtil.extractEmail(token);
+        List<ItemWithBookingsDTO> itemsWithBookings = itemService.getItemsWithBookingsByUserEmail(email);
+        return ResponseEntity.ok(itemsWithBookings);
     }
 }
