@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.SpringProject.kharidoMat.dto.ItemDetailResponseDTO;
+import com.SpringProject.kharidoMat.dto.ItemWithBookingsDTO;
 import com.SpringProject.kharidoMat.model.Booking;
 import com.SpringProject.kharidoMat.model.Category;
 import com.SpringProject.kharidoMat.model.Item;
@@ -148,5 +149,19 @@ public class ItemService {
         dto.setTotalReviews(totalReviews);
 
         return dto;
+    }
+    
+    public List<ItemWithBookingsDTO> getItemsWithBookingsByUserEmail(String email) {
+        User user = userRepository.findByEmail(email);
+        List<Item> items = itemRepository.findByUser(user);
+        List<ItemWithBookingsDTO> result = new java.util.ArrayList<>();
+
+        for (Item item : items) {
+            List<Booking> bookings = bookingRepository.findAllByItemId(item.getId());
+            ItemWithBookingsDTO dto = new ItemWithBookingsDTO(item, bookings);
+            result.add(dto);
+        }
+
+        return result;
     }
 }
