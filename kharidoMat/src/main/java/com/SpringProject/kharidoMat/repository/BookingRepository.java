@@ -26,12 +26,13 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     List<Booking> findByReturnStatus(String returnStatus);
 
     @Query("SELECT b FROM Booking b " +
-           "WHERE b.item.id = :itemId " +
-           "AND b.status = 'ACTIVE' " +
-           "AND (:startDate <= b.endDate AND :endDate >= b.startDate)")
-    List<Booking> findConflictingBookings(@Param("itemId") Long itemId,
-                                          @Param("startDate") LocalDate startDate,
-                                          @Param("endDate") LocalDate endDate);
+    	       "WHERE b.item.id = :itemId " +
+    	       "AND b.status NOT IN ('CANCELLED', 'REJECTED') " +
+    	       "AND (:startDate <= b.endDate AND :endDate >= b.startDate)")
+    	List<Booking> findConflictingBookings(@Param("itemId") Long itemId,
+    	                                      @Param("startDate") LocalDate startDate,
+    	                                      @Param("endDate") LocalDate endDate);
+
 
     @Query("SELECT b FROM Booking b WHERE b.user = :user AND b.status = 'ACTIVE' AND b.startDate > :today")
     List<Booking> findUpcomingBookings(@Param("user") User user, @Param("today") LocalDate today);
@@ -50,7 +51,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     @Query("SELECT COALESCE(SUM(b.amount), 0) FROM Booking b WHERE b.item.user.id = :ownerId")
     double sumAmountEarnedByOwnerId(@Param("ownerId") Long ownerId);
 
-    List<Booking> findAllByItemId(Long itemId);
+    List<Booking> findAllByItemId(Long itemId);  
     
     @Query("SELECT b FROM Booking b WHERE b.item.id = :itemId AND b.status = 'COMPLETED' AND FUNCTION('YEAR', b.endDate) = :year AND FUNCTION('MONTH', b.endDate) = :monthValue")
     List<Booking> findCompletedBookingsForItemInMonth(

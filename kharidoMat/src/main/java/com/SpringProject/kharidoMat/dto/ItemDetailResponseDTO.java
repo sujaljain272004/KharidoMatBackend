@@ -15,6 +15,7 @@ public class ItemDetailResponseDTO {
 	private String description;
 
 	private double pricePerDay;
+	private double baseDeposit;
 
 	private Set<String> categories;
 
@@ -40,6 +41,15 @@ public class ItemDetailResponseDTO {
 		        categoryNames.add(cat.getName());
 		    }
 		}
+	    double maxDeposit = 0.0;
+	    if (item.getCategories() != null && !item.getCategories().isEmpty()) {
+	        for (Category cat : item.getCategories()) {
+	            if (cat.getBaseDeposit() > maxDeposit) {
+	                maxDeposit = cat.getBaseDeposit();
+	            }
+	        }
+	    }
+	    this.baseDeposit = maxDeposit;
 		this.categories = categoryNames;
 
 		this.available = item.isAvailable();
@@ -127,5 +137,13 @@ public class ItemDetailResponseDTO {
     public void setTotalReviews(Long totalReviews) {
         this.totalReviews = totalReviews;
     }
+
+	public double getBaseDeposit() {
+		return baseDeposit;
+	}
+
+	public void setBaseDeposit(double baseDeposit) {
+		this.baseDeposit = baseDeposit;
+	}
 
 }

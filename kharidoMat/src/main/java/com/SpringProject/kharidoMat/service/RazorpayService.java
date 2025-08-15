@@ -2,6 +2,8 @@ package com.SpringProject.kharidoMat.service;
 
 import com.razorpay.Order;
 import com.razorpay.RazorpayClient;
+import com.razorpay.RazorpayException;
+
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -42,5 +44,15 @@ public class RazorpayService {
         mac.init(secretKey);
         byte[] hashBytes = mac.doFinal(data.getBytes());
         return Hex.encodeHexString(hashBytes);
+    }
+    
+ // ADD THIS METHOD
+    public void initiateRefund(String paymentId, double amount) throws RazorpayException {
+        RazorpayClient client = new RazorpayClient(keyId, keySecret);
+
+        JSONObject refundRequest = new JSONObject();
+        refundRequest.put("amount", (int)(amount * 100)); // amount in paise
+
+        client.payments.refund(paymentId, refundRequest);
     }
 }

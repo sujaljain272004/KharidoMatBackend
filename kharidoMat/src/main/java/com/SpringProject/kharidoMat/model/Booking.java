@@ -38,6 +38,7 @@ public class Booking {
     @ManyToOne
     private Item item;
 
+    private double securityDeposit;
     // Getters and Setters
 
     public Long getId() {
@@ -142,6 +143,14 @@ public class Booking {
 
 	public void setRazorpayOrderId(String razorpayOrderId) {
 		this.razorpayOrderId = razorpayOrderId;
+	}
+
+	public double getSecurityDeposit() {
+		return securityDeposit;
+	}
+
+	public void setSecurityDeposit(double securityDeposit) {
+		this.securityDeposit = securityDeposit;
 	}
     
      

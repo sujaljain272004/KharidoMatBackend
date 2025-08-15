@@ -7,6 +7,7 @@ import java.util.Map;
 import com.SpringProject.kharidoMat.dto.BookingDTO;
 import com.SpringProject.kharidoMat.dto.BookingDateDto;
 import com.SpringProject.kharidoMat.dto.BookingRequestDTO;
+import com.SpringProject.kharidoMat.dto.PaymentOrderRequestDTO;
 import com.SpringProject.kharidoMat.model.Booking;
 import com.razorpay.RazorpayException;
 
@@ -17,7 +18,7 @@ public interface BookingService {
 
 	List<Booking> getBookingsForOwner(String username);
 
-	Booking getBookingById(Long bookingId);
+	BookingDTO getBookingById(Long bookingId);
 
 	Booking cancelBooking(Long bookingId, String username);
 
@@ -34,5 +35,9 @@ public interface BookingService {
 	
 	Map<String, Object> createExtensionPaymentOrder(Long bookingId, LocalDate newEndDate)throws RazorpayException;
 	void verifyExtensionPaymentAndUpdateBooking(Long bookingId, LocalDate newEndDate, String paymentId, String orderId, String signature);
+	
+	public Map<String, Object> createPaymentOrderForBooking(PaymentOrderRequestDTO bookingRequest) throws Exception;
+	
+	 void processItemReturn(Long bookingId, boolean accepted, String notes);
 
 }

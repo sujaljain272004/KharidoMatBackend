@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import com.SpringProject.kharidoMat.dto.BookingDTO;
 import com.SpringProject.kharidoMat.dto.BookingDateDto;
 import com.SpringProject.kharidoMat.dto.BookingRequestDTO;
+import com.SpringProject.kharidoMat.dto.ReturnRequestDTO;
 import com.SpringProject.kharidoMat.enums.BookingStatus;
 import com.SpringProject.kharidoMat.model.Booking;
 import com.SpringProject.kharidoMat.model.User;
@@ -74,6 +75,11 @@ public class BookingController {
         Booking booking = bookingService.cancelBooking(id, username);
         return ResponseEntity.ok(booking);
     }
+    @GetMapping("/{bookingId}")
+    public ResponseEntity<BookingDTO> getBookingDetails(@PathVariable Long bookingId) {
+        BookingDTO bookingDto = bookingService.getBookingById(bookingId);
+        return ResponseEntity.ok(bookingDto);
+    }
 
     @PutMapping("/extend/{id}")
     public ResponseEntity<?> extendBooking(@PathVariable Long id,
@@ -112,24 +118,27 @@ public class BookingController {
 
  // In your BookingController.java
 
-    @PostMapping("/return/verify/{bookingId}")
-    public ResponseEntity<String> verifyReturn(@PathVariable Long bookingId,
-                                               @RequestParam boolean accepted) {
-        logger.info("Verifying return for booking ID {}. Accepted: {}", bookingId, accepted);
-        Booking booking = bookingRepository.findById(bookingId).orElseThrow();
+ // Make sure to import ReturnRequestDTO and Map
 
-        if (accepted) {
-            booking.setReturned(true);
-            booking.setReturnStatus("confirmed");
-            booking.setStatus(BookingStatus.COMPLETED); // <-- ADD THIS LINE
+ // NEW, REFACTORED METHOD:
+ @PostMapping("/return/verify/{bookingId}")
+ public ResponseEntity<?> verifyReturn(@PathVariable Long bookingId,
+                                       @RequestBody ReturnRequestDTO request) {
+     try {
+         // All logic is now handled by the service layer
+         bookingService.processItemReturn(bookingId, request.isAccepted(), request.getNotes());
+         
+         String message = request.isAccepted() 
+             ? "Return confirmed and refund initiated." 
+             : "Return rejected and deposit forfeited.";
+             
+         return ResponseEntity.ok(Map.of("message", message));
 
-        } else {
-            booking.setReturnStatus("rejected");
-        }
-
-        bookingRepository.save(booking);
-        return ResponseEntity.ok("Return " + (accepted ? "confirmed and booking completed" : "rejected"));
-    }
+     } catch (Exception e) {
+         logger.error("Error processing return for booking {}: {}", bookingId, e.getMessage());
+         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", e.getMessage()));
+     }
+ }
 
     @PostMapping("/return/request-otp/{bookingId}")
     public ResponseEntity<String> sendOtp(@PathVariable Long bookingId) {
