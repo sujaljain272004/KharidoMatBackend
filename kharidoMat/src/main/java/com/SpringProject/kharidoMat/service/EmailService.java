@@ -53,7 +53,7 @@ public class EmailService {
             logger.error("Failed to send email to {}: {}", to, e.getMessage());
         }
     }
-
+    @Async
     public void sendOtpEmail(String toEmail, String otp) {
         try {
             SimpleMailMessage message = new SimpleMailMessage();
@@ -95,7 +95,7 @@ public class EmailService {
             e.printStackTrace();
         }
     }
-    
+    @Async
     private byte[] generateInvoicePdf(Booking booking) throws Exception {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         Document document = new Document();

@@ -4,6 +4,8 @@ import java.util.Map;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.SpringProject.kharidoMat.dto.PaymentOrderRequestDTO;
+import com.SpringProject.kharidoMat.service.BookingService;
 import com.SpringProject.kharidoMat.service.RazorpayService;
 import com.razorpay.Order;
 
@@ -12,23 +14,27 @@ import com.razorpay.Order;
 public class PaymentController {
 
     private final RazorpayService razorpayService;
+    
+    private final BookingService bookingService;
 
-    public PaymentController(RazorpayService razorpayService) {
+    public PaymentController(RazorpayService razorpayService,BookingService bookingService) {
         this.razorpayService = razorpayService;
+        this.bookingService=bookingService;
     }
 
     @PostMapping("/create-order")
-    public ResponseEntity<?> createOrder(@RequestBody Map<String, Object> data) {
+    public ResponseEntity<?> createOrder(@RequestBody PaymentOrderRequestDTO requestDTO) {
         try {
-            double amount = Double.parseDouble(data.get("amount").toString());
-            Order order = razorpayService.createOrder(amount);
+            // The frontend no longer sends the amount. We call the service to calculate it.
+            // This reuses the logic we created in the previous step.
+            Map<String, Object> orderDetails = bookingService.createPaymentOrderForBooking(requestDTO);
 
-            return ResponseEntity.ok(Map.of(
-                "orderId", order.get("id"),
-                "amount", order.get("amount"),
-                "currency", order.get("currency")
-            ));
+            // The map returned by the service already contains orderId, amount, etc.
+            return ResponseEntity.ok(orderDetails);
+            
         } catch (Exception e) {
+            // Log the full exception for debugging
+            // logger.error("Order creation failed", e); 
             return ResponseEntity.status(500).body("Order creation failed: " + e.getMessage());
         }
     }

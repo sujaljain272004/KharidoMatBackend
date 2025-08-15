@@ -12,6 +12,10 @@ public class BookingDTO {
     private BookingStatus status;
     private ItemDTO item;  // Nested Item details
     private UserDTO owner; // Nested Owner details
+    
+    private Double securityDeposit;
+    private String depositStatus;
+    
 	public Long getId() {
 		return id;
 	}
@@ -53,6 +57,18 @@ public class BookingDTO {
 	}
 	public void setOwner(UserDTO owner) {
 		this.owner = owner;
+	}
+	public Double getSecurityDeposit() {
+		return securityDeposit;
+	}
+	public void setSecurityDeposit(Double securityDeposit) {
+		this.securityDeposit = securityDeposit;
+	}
+	public String getDepositStatus() {
+		return depositStatus;
+	}
+	public void setDepositStatus(String depositStatus) {
+		this.depositStatus = depositStatus;
 	}
     
     

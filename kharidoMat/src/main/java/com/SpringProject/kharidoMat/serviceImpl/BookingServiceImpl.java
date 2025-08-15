@@ -5,6 +5,7 @@ import com.SpringProject.kharidoMat.dto.BookingDTO; // Import DTOs
 import com.SpringProject.kharidoMat.dto.BookingDateDto;
 import com.SpringProject.kharidoMat.dto.BookingRequestDTO;
 import com.SpringProject.kharidoMat.dto.ItemDTO;
+import com.SpringProject.kharidoMat.dto.PaymentOrderRequestDTO;
 import com.SpringProject.kharidoMat.dto.UserDTO;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
@@ -20,18 +21,25 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import com.SpringProject.kharidoMat.enums.BookingStatus;
+import com.SpringProject.kharidoMat.enums.DepositStatus;
 import com.SpringProject.kharidoMat.model.Booking;
+import com.SpringProject.kharidoMat.model.Category;
+import com.SpringProject.kharidoMat.model.Deposit;
 import com.SpringProject.kharidoMat.model.Item;
 import com.SpringProject.kharidoMat.model.User;
 import com.SpringProject.kharidoMat.repository.BookingRepository;
+import com.SpringProject.kharidoMat.repository.DepositRepository;
 import com.SpringProject.kharidoMat.repository.ItemRepository;
 import com.SpringProject.kharidoMat.repository.UserRepository;
 import com.SpringProject.kharidoMat.service.BookingService;
 import com.SpringProject.kharidoMat.service.EmailService;
+import com.SpringProject.kharidoMat.service.RazorpayService;
 import com.razorpay.Order;
 import com.razorpay.RazorpayClient;
 import com.razorpay.RazorpayException;
 import com.razorpay.Utils;
+
+import jakarta.transaction.Transactional;
 
 @Service
 public class BookingServiceImpl implements BookingService {
@@ -49,63 +57,148 @@ public class BookingServiceImpl implements BookingService {
 
 	@Autowired
 	private EmailService emailService;
+	
+	@Autowired
+	private DepositRepository depositRepository;
+	
+	@Autowired
+	private RazorpayService razorpayService;
+	
+	
+	// In BookingServiceImpl.java
 
 
 	@Override
-	public Booking createBooking(BookingRequestDTO bookingRequest, String username) {
-	    logger.info("Service: Creating booking for item {} by user {}", bookingRequest.getItemId(), username);
+	public Map<String, Object> createPaymentOrderForBooking(PaymentOrderRequestDTO bookingRequest) throws Exception {
+	    logger.info("STEP 1: Validating availability and creating payment order for item {}", bookingRequest.getItemId());
+	    
+	    // ================== START: CRITICAL VALIDATION FIX ==================
 
-	    // 1. Find the User and Item from the database
+	    // 1. PERFORM THE VALIDATION CHECK FIRST.
+	    List<Booking> overlappingBookings = bookingRepository.findConflictingBookings(
+	        bookingRequest.getItemId(),
+	        bookingRequest.getStartDate(),
+	        bookingRequest.getEndDate()
+	    );
+
+	    // 2. If any conflicts are found, reject the request BEFORE creating a payment order.
+	    if (!overlappingBookings.isEmpty()) {
+	        throw new IllegalArgumentException("Item is not available for the selected dates. Please try again.");
+	    }
+
+	    // ==================  END: CRITICAL VALIDATION FIX  ==================
+
+	    // 3. If validation passes, proceed with the rest of the original logic.
+	    Optional<Item> itemOpt = itemRepository.findById(bookingRequest.getItemId());
+	    Item item;
+	    if (itemOpt.isPresent()) {
+	        item = itemOpt.get();
+	    } else {
+	        throw new IllegalArgumentException("Item not found with ID: " + bookingRequest.getItemId());
+	    }
+
+	    // Calculate rental days
+	    long days = ChronoUnit.DAYS.between(bookingRequest.getStartDate(), bookingRequest.getEndDate()) + 1;
+	    if (days <= 0) {
+	        throw new IllegalArgumentException("End date must be on or after start date.");
+	    }
+
+	    // ... (rest of your amount calculation logic is correct) ...
+	    double depositAmount = 0.0;
+	    Set<Category> categories = item.getCategories();
+	    if (categories != null && !categories.isEmpty()) {
+	        for (Category category : categories) {
+	            if (category.getBaseDeposit() > depositAmount) {
+	                depositAmount = category.getBaseDeposit();
+	            }
+	        }
+	    } else {
+	        throw new IllegalStateException("Item with ID " + item.getId() + " has no categories assigned.");
+	    }
+
+	    double rentAmount = days * item.getPricePerDay();
+	    double totalAmount = rentAmount + depositAmount;
+
+	    // Create Razorpay Order
+	    Order order = razorpayService.createOrder(totalAmount);
+	    Map<String, Object> response = new HashMap<>();
+	    response.put("orderId", order.get("id"));
+	    response.put("amount", order.get("amount")); // Amount in paise
+	    return response;
+	}
+	// In BookingServiceImpl.java
+	
+	@Transactional
+	public Booking createBooking(BookingRequestDTO bookingRequest, String username) {
+	    logger.info("STEP 2: Finalizing booking for item {} after successful payment", bookingRequest.getItemId());
+
+	    // ================== START: VALIDATION FIX ==================
+
+	    // 1. Check for overlapping bookings first.
+	    List<Booking> overlappingBookings = bookingRepository.findConflictingBookings(
+	        bookingRequest.getItemId(),
+	        bookingRequest.getStartDate(),
+	        bookingRequest.getEndDate()
+	    );
+
+	    // 2. If the list is not empty, a conflict exists. Reject the request immediately.
+	    if (!overlappingBookings.isEmpty()) {
+	    	
+	        throw new IllegalArgumentException("Item is not available for the selected dates. Please try again.");
+	    }
+
+	    // ================== END: VALIDATION FIX ==================
+
 	    User user = userRepository.findByEmail(username);
 	    if (user == null) {
 	        throw new IllegalArgumentException("User not found with email: " + username);
 	    }
 
-	    Item item = itemRepository.findById(bookingRequest.getItemId())
+	    Item item = itemRepository.findByIdForUpdate(bookingRequest.getItemId())
 	            .orElseThrow(() -> new IllegalArgumentException("Item not found with ID: " + bookingRequest.getItemId()));
 
-	    // 2. Perform validation checks
-	    if (item.getUser().getEmail().equals(username)) {
-	        logger.warn("User {} attempted to book their own item {}", username, bookingRequest.getItemId());
+	    
+	    // 3. Add a check to prevent a user from booking their own item.
+	    if (item.getUser().equals(user)) {
 	        throw new IllegalArgumentException("You cannot book your own item.");
 	    }
-
-	    List<Booking> conflicts = bookingRepository.findConflictingBookings(
-	        bookingRequest.getItemId(), 
-	        bookingRequest.getStartDate(), 
-	        bookingRequest.getEndDate()
-	    );
-	    if (!conflicts.isEmpty()) {
-	        logger.warn("Booking conflict for item {}", bookingRequest.getItemId());
-	        throw new IllegalArgumentException("Item is already booked for the selected dates.");
+	            
+	    // Recalculate amounts on the server to be safe
+	    long days = ChronoUnit.DAYS.between(bookingRequest.getStartDate(), bookingRequest.getEndDate()) + 1;
+	    double rentAmount = days * item.getPricePerDay();
+	    
+	    double depositAmount = 0.0;
+	    Set<Category> categories = item.getCategories();
+	    for (Category category : categories) {
+	        if (category.getBaseDeposit() > depositAmount) {
+	            depositAmount = category.getBaseDeposit();
+	        }
 	    }
+	    double totalAmount = rentAmount + depositAmount;
 
-	    // 3. Create and populate the new Booking object from the DTO
+	    // Create and save the booking with payment details from the frontend
 	    Booking newBooking = new Booking();
 	    newBooking.setUser(user);
 	    newBooking.setItem(item);
 	    newBooking.setStartDate(bookingRequest.getStartDate());
 	    newBooking.setEndDate(bookingRequest.getEndDate());
-	    newBooking.setAmount(bookingRequest.getTotalPrice()); // Use the price from the request
-	    newBooking.setStatus(BookingStatus.ACTIVE);
-
-	    // --- THIS IS THE KEY PART ---
-	    // 4. Set the Razorpay transaction details
-	    newBooking.setRazorpayPaymentId(bookingRequest.getRazorpayPaymentId());
+	    newBooking.setAmount(totalAmount);
+	    newBooking.setSecurityDeposit(depositAmount);
+	    newBooking.setStatus(BookingStatus.ACTIVE); // Or CONFIRMED, based on your logic
 	    newBooking.setRazorpayOrderId(bookingRequest.getRazorpayOrderId());
-	    // -------------------------
+	    newBooking.setRazorpayPaymentId(bookingRequest.getRazorpayPaymentId());
 
-	    // 5. Save the booking, send emails, and return
 	    Booking savedBooking = bookingRepository.save(newBooking);
+	    
+	    // Create and save the deposit record
+	    Deposit deposit = new Deposit(depositAmount, DepositStatus.HELD, savedBooking);
+	    depositRepository.save(deposit);
 
 	    emailService.sendBookingConfirmationEmail(savedBooking);
 	    emailService.sendOwnerNotificationEmail(savedBooking);
 
-	    logger.info("Booking created and confirmation email sent successfully for booking ID: {}", savedBooking.getId());
 	    return savedBooking;
 	}
-
-
 	@Override
 	public List<BookingDTO> getBookingByUser(String username) {
 		logger.info("Fetching bookings for user {}", username);
@@ -128,6 +221,13 @@ public class BookingServiceImpl implements BookingService {
 			dto.setEndDate(booking.getEndDate());
 			dto.setTotalAmount(booking.getAmount());
 			dto.setStatus(booking.getStatus());
+			
+			Optional<Deposit> depositOpt = depositRepository.findByBooking(booking);
+	        if (depositOpt.isPresent()) {
+	            Deposit deposit = depositOpt.get();
+	            dto.setSecurityDeposit(deposit.getAmount());
+	            dto.setDepositStatus(deposit.getStatus().name()); // .name() converts enum to String
+	        }
 
 			ItemDTO itemDto = new ItemDTO();
 			itemDto.setId(booking.getItem().getId());
@@ -181,13 +281,48 @@ public class BookingServiceImpl implements BookingService {
 	}
 
 	@Override
-	public Booking getBookingById(Long bookingId) {
-		logger.info("Fetching booking by ID: {}", bookingId);
+	public BookingDTO getBookingById(Long bookingId) {
+	    logger.info("Fetching booking by ID: {}", bookingId);
 
-		return bookingRepository.findById(bookingId).orElseThrow(() -> {
-			logger.error("Booking not found: {}", bookingId);
-			return new RuntimeException("Booking not found");
-		});
+	    // 1. Find the booking entity from the database
+	    Booking booking = bookingRepository.findById(bookingId).orElseThrow(() -> {
+	        logger.error("Booking not found: {}", bookingId);
+	        return new RuntimeException("Booking not found");
+	    });
+
+	    // 2. Create and populate the DTO
+	    BookingDTO dto = new BookingDTO();
+	    dto.setId(booking.getId());
+	    dto.setStartDate(booking.getStartDate());
+	    dto.setEndDate(booking.getEndDate());
+	    dto.setTotalAmount(booking.getAmount());
+	    dto.setStatus(booking.getStatus());
+
+	    // Populate the nested ItemDTO
+	    ItemDTO itemDto = new ItemDTO();
+	    itemDto.setId(booking.getItem().getId());
+	    itemDto.setName(booking.getItem().getTitle());
+	    itemDto.setImageUrl(booking.getItem().getImageName());
+	    itemDto.setPricePerDay(booking.getItem().getPricePerDay());
+	    dto.setItem(itemDto);
+
+	    // Populate the nested OwnerDTO
+	    UserDTO ownerDto = new UserDTO();
+	    ownerDto.setId(booking.getItem().getUser().getId());
+	    ownerDto.setFullName(booking.getItem().getUser().getFullName());
+	    ownerDto.setEmail(booking.getItem().getUser().getEmail());
+	    dto.setOwner(ownerDto);
+	    
+	    // 3. Find the associated deposit and add its status to the DTO
+	    Optional<Deposit> depositOpt = depositRepository.findByBooking(booking);
+	    if (depositOpt.isPresent()) {
+	        Deposit deposit = depositOpt.get();
+	        dto.setSecurityDeposit(deposit.getAmount());
+	        dto.setDepositStatus(deposit.getStatus().name());
+	    }
+
+	    // 4. Return the complete DTO
+	    return dto;
 	}
 
 	@Override
@@ -300,6 +435,13 @@ public class BookingServiceImpl implements BookingService {
 			dto.setEndDate(booking.getEndDate());
 			dto.setTotalAmount(booking.getAmount());
 			dto.setStatus(booking.getStatus());
+			
+			Optional<Deposit> depositOpt = depositRepository.findByBooking(booking);
+            if (depositOpt.isPresent()) {
+                Deposit deposit = depositOpt.get();
+                dto.setSecurityDeposit(deposit.getAmount());
+                dto.setDepositStatus(deposit.getStatus().name());
+            }
 
 			ItemDTO itemDto = new ItemDTO();
 			itemDto.setId(booking.getItem().getId());
@@ -400,5 +542,56 @@ public class BookingServiceImpl implements BookingService {
 			logger.error("An error occurred during payment verification", e);
 			throw new RuntimeException("An error occurred during payment verification.");
 		}
+	}
+	
+	@Override
+	public void processItemReturn(Long bookingId, boolean accepted, String notes) {
+	    logger.info("Processing return for booking ID: {}. Accepted: {}", bookingId, accepted);
+
+	    Booking booking = bookingRepository.findById(bookingId)
+	            .orElseThrow(() -> new RuntimeException("Booking not found"));
+
+	    // Find the associated deposit record using the new repository method
+	    Deposit deposit = depositRepository.findByBooking(booking)
+	            .orElseThrow(() -> new RuntimeException("Deposit record not found"));
+
+	    // Prevent processing the same deposit twice
+	    if (deposit.getStatus() != DepositStatus.HELD) {
+	        throw new IllegalStateException("This deposit has already been processed.");
+	    }
+
+	    if (accepted) {
+	        // --- ITEM RETURNED OK - INITIATE REFUND ---
+	        String paymentId = booking.getRazorpayPaymentId();
+	        if (paymentId == null || paymentId.isBlank()) {
+	            throw new IllegalStateException("Cannot process refund: Razorpay Payment ID is missing.");
+	        }
+	        
+	        try {
+	            razorpayService.initiateRefund(paymentId, deposit.getAmount());
+	            deposit.setStatus(DepositStatus.REFUNDED);
+	            logger.info("Refund initiated successfully for booking {}.", bookingId);
+	            // emailService.sendRefundInitiatedEmail(booking);
+
+	        } catch (RazorpayException e) {
+	            logger.error("Razorpay refund failed for booking {}: {}", bookingId, e.getMessage());
+	            throw new RuntimeException("Refund processing via payment gateway failed.");
+	        }
+
+	        booking.setReturnStatus("confirmed");
+	        booking.setStatus(BookingStatus.COMPLETED);
+	        booking.setReturned(true);
+
+	    } else {
+	        // --- ITEM DAMAGED - FORFEIT DEPOSIT ---
+	        logger.warn("Item for booking {} was rejected by owner. Forfeiting deposit.", bookingId);
+	        deposit.setStatus(DepositStatus.FORFEITED);
+	        booking.setReturnStatus("rejected");
+	        // emailService.sendDepositForfeitedEmail(booking, notes);
+	    }
+
+	    // Save all changes to the database
+	    depositRepository.save(deposit);
+	    bookingRepository.save(booking);
 	}
 }
