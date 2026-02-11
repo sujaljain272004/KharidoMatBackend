@@ -1,3 +1,4 @@
+/*
 
 
 package com.SpringProject.kharidoMat.config;
@@ -38,3 +39,4 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler 
         response.sendRedirect(redirectUrl);
     }
 }
+*/
