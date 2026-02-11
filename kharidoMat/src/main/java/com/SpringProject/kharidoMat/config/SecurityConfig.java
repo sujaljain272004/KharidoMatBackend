@@ -32,7 +32,7 @@ public class SecurityConfig {
     private static final Logger logger = LoggerFactory.getLogger(SecurityConfig.class);
     private final JwtAuthFilter jwtAuthFilter;
     @Autowired
-    private CustomOAuth2SuccessHandler oAuth2SuccessHandler;
+//    private CustomOAuth2SuccessHandler oAuth2SuccessHandler;
 
     public SecurityConfig(JwtAuthFilter jwtAuthFilter) {
         this.jwtAuthFilter = jwtAuthFilter;
@@ -96,7 +96,7 @@ public class SecurityConfig {
                     // Any other request will require authentication.
                     .anyRequest().authenticated();
             })
-            .oauth2Login(oauth2 -> oauth2.successHandler(oAuth2SuccessHandler))
+//            .oauth2Login(oauth2 -> oauth2.successHandler(oAuth2SuccessHandler))
             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         logger.info("SecurityFilterChain configured successfully");
