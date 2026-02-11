@@ -489,7 +489,7 @@ public class BookingServiceImpl implements BookingService {
 
 		// 3. Create a Razorpay order (you likely have similar logic for initial
 		// bookings)
-		RazorpayClient razorpay = new RazorpayClient("rzp_test_n5Y0q2oWkbhx2b", "SJav5iDCiTd3x43xN3U4ru1Z");
+		RazorpayClient razorpay = new RazorpayClient("rzp_test_RwvdN24x3arIw6", "17Yge36s66G4sul1cE4bpTEn");
 
 		JSONObject orderRequest = new JSONObject();
 		orderRequest.put("amount", extensionAmount * 100); // Amount in paise
@@ -519,7 +519,7 @@ public class BookingServiceImpl implements BookingService {
 			options.put("razorpay_signature", signature); // The signature goes INSIDE the JSON object
 
 			// 2. Verify the signature using the JSON object and your secret key
-			boolean isValid = Utils.verifyPaymentSignature(options, "SJav5iDCiTd3x43xN3U4ru1Z");
+			boolean isValid = Utils.verifyPaymentSignature(options, "17Yge36s66G4sul1cE4bpTEn");
 
 			if (!isValid) {
 				throw new RazorpayException("Payment verification failed: Invalid signature.");
