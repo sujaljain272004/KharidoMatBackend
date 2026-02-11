@@ -49,12 +49,12 @@ public class PaymentController {
             boolean isValid = razorpayService.verifySignature(razorpayOrderId, razorpayPaymentId, razorpaySignature);
 
             if (isValid) {
-                return ResponseEntity.ok("✅ Payment verified and booking confirmed.");
+                return ResponseEntity.ok("Payment verified and booking confirmed.");
             } else {
-                return ResponseEntity.status(400).body("❌ Invalid payment signature");
+                return ResponseEntity.status(400).body("Invalid payment signature");
             }
         } catch (Exception e) {
-            return ResponseEntity.status(500).body("❌ Verification failed: " + e.getMessage());
+            return ResponseEntity.status(500).body(" Verification failed: " + e.getMessage());
         }
     }
 }
